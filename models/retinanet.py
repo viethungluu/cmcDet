@@ -6,11 +6,11 @@ import lightning as L
 
 from resnet import CMCResNets
 
-class CMCRetinaNets(nn.Module):
+class CMCRetinaNet(nn.Module):
     def __init__(self, 
                  backbone: CMCResNets,
                  trainable_backbone_layers: int=0):
-        super(CMCRetinaNets, self).__init__()
+        super(CMCRetinaNet, self).__init__()
         
         self.l_to_ab = backbone.l_to_ab
         self.l_to_ab = _resnet_fpn_extractor(
