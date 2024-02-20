@@ -2,6 +2,8 @@ import torch, torch.nn as nn
 import torchvision
 from torchvision.models.detection.backbone_utils import _resnet_fpn_extractor
 from torchvision.ops.feature_pyramid_network import LastLevelP6P7
+from torchvision.models.detection.anchor_utils import AnchorGenerator
+
 import lightning as L
 
 from resnet import CMCResNets
@@ -21,4 +23,7 @@ class CMCRetinaNet(nn.Module):
                             self.ab_to_l, trainable_backbone_layers, returned_layers=[2, 3, 4], extra_blocks=LastLevelP6P7(256, 256))
 
     def forward(self, x, layer=7):
-        pass
+        l, ab = torch.split(x, [1, 2], dim=1)
+        feat_l = self.l_to_ab(l, layer)
+        feat_ab = self.ab_to_l(ab, layer)
+        return feat_l, feat_ab
