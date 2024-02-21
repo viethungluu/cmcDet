@@ -314,9 +314,9 @@ class ResNetV3(nn.Module):
         return feat_l, feat_ab
 
 
-class CMCResNets(nn.Module):
+class MyResNetsCMC(nn.Module):
     def __init__(self, name='resnet50v1'):
-        super(CMCResNets, self).__init__()
+        super(MyResNetsCMC, self).__init__()
         if name.endswith('v1'):
             self.encoder = ResNetV1(name[:-2])
         elif name.endswith('v2'):

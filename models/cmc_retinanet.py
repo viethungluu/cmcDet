@@ -6,7 +6,7 @@ import lightning as L
 from torchvision.models.detection.retinanet import RetinaNet
 from torchvision.ops.feature_pyramid_network import LastLevelP6P7
 
-from models.resnet import CMCResNets
+from models.resnet import MyResNetsCMC
 from models.backbone_utils import _dual_resnet_fpn_extractor
 
 class CMCRetinaNet(L.LightningModule):
@@ -18,7 +18,7 @@ class CMCRetinaNet(L.LightningModule):
                  lr: float=1e-3):
         super().__init__()
 
-        cmc = CMCResNets(name=cmc_backbone)
+        cmc = MyResNetsCMC(name=cmc_backbone)
         if cmc_weights_path:
             ckpt = torch.load(cmc_weights_path)
             cmc.load_state_dict(ckpt['model'])
