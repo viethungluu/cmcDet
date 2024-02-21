@@ -27,7 +27,7 @@ class CMCRetinaNet(L.LightningModule):
         backbone = _dual_resnet_fpn_extractor(
             backbone_l=cmc.encoder.module.l_to_ab, 
             backbone_ab=cmc.encoder.module.ab_to_l, 
-            trainable_backbone_layers=trainable_backbone_layers, 
+            trainable_layers=trainable_backbone_layers, 
             returned_layers=[2, 3, 4], 
             extra_blocks=LastLevelP6P7(2048, 256)
         )
