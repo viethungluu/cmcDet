@@ -3,6 +3,7 @@ import logging
 import os
 import xml.etree.ElementTree as ET
 
+import numpy as np
 import cv2
 import pandas as pd
 import torch
@@ -131,16 +132,18 @@ class PascalDataset(Dataset):
         # boxes = torch.tensor(transformed["bboxes"], dtype=torch.float32)
         # class_labels = torch.tensor(transformed["class_labels"])
         if self.transforms:
-            image = self.transforms(image)
-
+            image, boxes = self.transforms(image, np.array(boxes))
+        
         # target dictionary
         target = {}
-        image_idx = torch.tensor([index])
         target["image_id"] = image_idx
-        target["boxes"] = boxes
-        target["labels"] = class_labels
+        target['boxes'] = torch.as_tensor(boxes)
+        target["labels"] = torch.as_tensor(class_labels)
         target["area"] = area
         target["iscrowd"] = iscrowd
+
+        image_idx = torch.tensor([index])
+
         return image, target, image_idx
 
 
