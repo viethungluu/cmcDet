@@ -1,9 +1,12 @@
+import os
+
 import lightning as L
 
 from torch.utils.data import DataLoader
 from torchvision import transforms
 
 from dataset.pascal.pascal_utils import convert_annotations_to_df, PascalDataset
+from dataset.utils import RGB2Lab
 
 def remove_invalid_annots(df):
     df = df[df.xmax > df.xmin]
@@ -13,52 +16,49 @@ def remove_invalid_annots(df):
 
 class PascalDataModule(L.LightningDataModule):
     def __init__(self,
-                 train_image_path=None,
-                 val_image_path=None,
-                 test_image_path=None,
-                 train_annot_path=None,
-                 val_annot_path=None,
-                 test_annot_path=None,
+                 dataset_path,
                  train_batch_size=16,
                  test_batch_size=8,
                  seed=28):
         super().__init__()
 
-        self.train_image_path = train_image_path,
-        self.val_image_path = val_image_path,
-        self.test_image_path = test_image_path,
-        self.train_annot_path = train_annot_path,
-        self.val_annot_path = val_annot_path,
-        self.test_annot_path = test_annot_path,
+        self.train_dir = os.path.join(dataset_path, "train")
+        self.val_dir   = os.path.join(dataset_path, "valid")
+        self.test_dir  = os.path.join(dataset_path, "test")
+        
         self.train_batch_size = train_batch_size
         self.test_batch_size = test_batch_size
         self.seed = seed
 
     def prepare_data(self):
-        if self.train_image_path and self.train_annot_path:
-            self.train_df = convert_annotations_to_df(self.train_annot_path, self.train_image_path, image_set="train")
+        if os.path.isdir(self.train_dir):
+            self.train_df = convert_annotations_to_df(self.train_dir, image_set="train")
             self.train_df = remove_invalid_annots(self.train_df)
         
-        if self.val_image_path and self.val_annot_path:
-            self.val_df = convert_annotations_to_df(self.val_annot_path, self.val_image_path, image_set="test")
+        if os.path.isdir(self.val_dir):
+            self.val_df = convert_annotations_to_df(self.val_dir, image_set="test")
             self.val_df = remove_invalid_annots(self.val_df)
         
-        if self.test_image_path and self.test_annot_path:
-            self.test_df  = convert_annotations_to_df(self.test_annot_path, self.test_image_path, image_set="test")
+        if os.path.isdir(self.test_dir):
+            self.test_df  = convert_annotations_to_df(self.test_dir, image_set="test")
             self.test_df = remove_invalid_annots(self.test_df)
 
     def setup(self, stage):
-        # TODO: update transform operations
-        # according to  CMC pre-training
-        transform = [transforms.Resize((224, 224)),
+        # image transform to Lab color space
+        mean = [(0 + 100) / 2, (-86.183 + 98.233) / 2, (-107.857 + 94.478) / 2]
+        std = [(100 - 0) / 2, (86.183 + 98.233) / 2, (107.857 + 94.478) / 2]
+        normalize_transform = transforms.Normalize(mean=mean, std=std)
+
+        color_transform = RGB2Lab()
+
+        transform = [color_transform,
                      transforms.ToTensor(),
-                     transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])]
+                     normalize_transform]
 
         train_transform = transforms.Compose(transform + [
             transforms.RandomHorizontalFlip(p=0.5),
-            transforms.RandomRotation(degrees=15),
             transforms.RandomVerticalFlip(p=0.5),
-            transforms.RandomAutocontrast(p=0.5),
+            transforms.RandomRotation(degrees=15),
         ])
         test_transform = transforms.Compose(transform)
 
@@ -66,7 +66,7 @@ class PascalDataModule(L.LightningDataModule):
             self.train_dataset  = PascalDataset(self.train_df, transforms=train_transform)
             self.val_dataset    = PascalDataset(self.val_df, transforms=test_transform)
         else:
-            self.test_dataset    = PascalDataset(self.test_df, transforms=test_transform)
+            self.test_dataset   = PascalDataset(self.test_df, transforms=test_transform)
 
     def train_dataloader(self):
         if self.train_dataset is not None:

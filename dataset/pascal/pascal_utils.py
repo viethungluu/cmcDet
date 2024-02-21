@@ -14,9 +14,9 @@ logger = logging.getLogger(__name__)
 encoder = LabelEncoder()
 
 
-def convert_annotations_to_df(annotation_dir, image_dir, image_set="train"):
+def convert_annotations_to_df(data_dir, image_set="train"):
     xml_list = []
-    for xml_file in glob.glob(annotation_dir + "/*.xml"):
+    for xml_file in glob.glob(data_dir + "/*.xml"):
         tree = ET.parse(xml_file)
         root = tree.getroot()
         for member in root.findall("object"):
@@ -52,7 +52,7 @@ def convert_annotations_to_df(annotation_dir, image_dir, image_set="train"):
 
     xml_df = pd.DataFrame(xml_list, columns=column_name)
     xml_df["filename"] = [
-        os.path.join(image_dir, xml_df["filename"][i]) for i in range(len(xml_df))
+        os.path.join(data_dir, xml_df["filename"][i]) for i in range(len(xml_df))
     ]
 
     if image_set == "train":
