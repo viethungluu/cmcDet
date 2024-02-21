@@ -44,20 +44,21 @@ class PascalDataModule(L.LightningDataModule):
             self.test_df    = remove_invalid_annots(self.test_df)
 
         # image transform to Lab color space
-        mean = [(0 + 100) / 2, (-86.183 + 98.233) / 2, (-107.857 + 94.478) / 2]
-        std = [(100 - 0) / 2, (86.183 + 98.233) / 2, (107.857 + 94.478) / 2]
-        normalize_transform = transforms.Normalize(mean=mean, std=std)
+        # mean = [(0 + 100) / 2, (-86.183 + 98.233) / 2, (-107.857 + 94.478) / 2]
+        # std = [(100 - 0) / 2, (86.183 + 98.233) / 2, (107.857 + 94.478) / 2]
+        # normalize_transform = transforms.Normalize(mean=mean, std=std)
 
         color_transform = RGB2Lab()
 
         transform = [color_transform,
                      transforms.ToTensor(),
-                     normalize_transform]
+                    #  normalize_transform
+                    ]
 
         train_transform = transforms.Compose(transform + [
-            transforms.RandomHorizontalFlip(p=0.5),
-            transforms.RandomVerticalFlip(p=0.5),
-            transforms.RandomRotation(degrees=15),
+            # transforms.RandomHorizontalFlip(p=0.5),
+            # transforms.RandomVerticalFlip(p=0.5),
+            # transforms.RandomRotation(degrees=15),
         ])
         test_transform = transforms.Compose(transform)
 

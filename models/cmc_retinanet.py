@@ -15,6 +15,8 @@ class CMCRetinaNet(L.LightningModule):
                  cmc_weights_path: str=None,
                  trainable_backbone_layers: int=0,
                  n_classes: int=2,
+                 image_mean=None,
+                 image_std=None,
                  lr: float=1e-3):
         super().__init__()
 
@@ -32,7 +34,10 @@ class CMCRetinaNet(L.LightningModule):
             extra_blocks=LastLevelP6P7(2048, 256)
         )
 
-        self.model = RetinaNet(backbone, num_classes=n_classes)
+        self.model = RetinaNet(backbone, 
+                               num_classes=n_classes,
+                               image_mean=image_mean,
+                               image_std=image_std)
 
         self.lr = lr
 

@@ -10,6 +10,8 @@ from lightning.pytorch.callbacks import ModelCheckpoint
 
 from models.cmc_retinanet import CMCRetinaNet
 from dataset.datamodule import PascalDataModule
+from dataset.pascal.pascal_transforms import generate_pascal_category_names
+
 
 def _parse_args():
     parser = argparse.ArgumentParser(description="Training CMCRetinaNet on Pascal VOC format")
@@ -43,9 +45,15 @@ def handle_train(args):
                           seed=args.seed)
     dm.setup(stage="fit")
 
+    label_map = generate_pascal_category_names(dm.train_df)
+
+    image_mean = [(0 + 100) / 2, (-86.183 + 98.233) / 2, (-107.857 + 94.478) / 2]
+    image_std = [(100 - 0) / 2, (86.183 + 98.233) / 2, (107.857 + 94.478) / 2]
     model = CMCRetinaNet(cmc_backbone=args.cmc_backbone,
                          cmc_weights_path=args.cmc_weights_path,
-                         n_classes=2,
+                         n_classes=len(label_map),
+                         image_mean=image_mean,
+                         image_std=image_std,
                          lr=args.lr)
     
     # Training

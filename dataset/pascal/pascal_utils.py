@@ -99,7 +99,7 @@ class PascalDataset(Dataset):
         if isinstance(dataframe, str):
             dataframe = pd.read_csv(dataframe)
 
-        self.tfms = transforms
+        self.transforms = transforms
         self.df = dataframe
         self.image_ids = self.df["filename"].unique()
 
@@ -126,10 +126,12 @@ class PascalDataset(Dataset):
         iscrowd = torch.zeros((records.shape[0],), dtype=torch.int64)
 
         # apply transformations
-        transformed = self.tfms(image=im, bboxes=boxes, class_labels=class_labels)
-        image = transformed["image"]
-        boxes = torch.tensor(transformed["bboxes"], dtype=torch.float32)
-        class_labels = torch.tensor(transformed["class_labels"])
+        # transformed = self.transforms(image=im, bboxes=boxes, class_labels=class_labels)
+        # image = transformed["image"]
+        # boxes = torch.tensor(transformed["bboxes"], dtype=torch.float32)
+        # class_labels = torch.tensor(transformed["class_labels"])
+        if self.transforms:
+            image = self.transforms(image)
 
         # target dictionary
         target = {}
@@ -139,7 +141,7 @@ class PascalDataset(Dataset):
         target["labels"] = class_labels
         target["area"] = area
         target["iscrowd"] = iscrowd
-        return image, target, image_idx
+        return image, torch.tensor(target), image_idx
 
 
 def get_pascal(annot_dir, image_dir, image_set="train", **kwargs):
