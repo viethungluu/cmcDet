@@ -30,7 +30,7 @@ class PascalDataModule(L.LightningDataModule):
         self.test_batch_size = test_batch_size
         self.seed = seed
 
-    def prepare_data(self):
+    def setup(self, stage):
         if os.path.isdir(self.train_dir):
             self.train_df = convert_annotations_to_df(self.train_dir, image_set="train")
             self.train_df = remove_invalid_annots(self.train_df)
@@ -40,10 +40,9 @@ class PascalDataModule(L.LightningDataModule):
             self.val_df = remove_invalid_annots(self.val_df)
         
         if os.path.isdir(self.test_dir):
-            self.test_df  = convert_annotations_to_df(self.test_dir, image_set="test")
-            self.test_df = remove_invalid_annots(self.test_df)
+            self.test_df    = convert_annotations_to_df(self.test_dir, image_set="test")
+            self.test_df    = remove_invalid_annots(self.test_df)
 
-    def setup(self, stage):
         # image transform to Lab color space
         mean = [(0 + 100) / 2, (-86.183 + 98.233) / 2, (-107.857 + 94.478) / 2]
         std = [(100 - 0) / 2, (86.183 + 98.233) / 2, (107.857 + 94.478) / 2]
