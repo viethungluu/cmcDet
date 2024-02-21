@@ -9,13 +9,6 @@ from torchvision.ops.feature_pyramid_network import LastLevelP6P7
 from models.resnet import CMCResNets
 from models.backbone_utils import _dual_resnet_fpn_extractor
 
-def _unwrap_dataparallel(backbone: str, model: nn.DataParallel):
-    if backbone.startswith('alexnet') or backbone.startswith('vgg'):
-        model.features = model.features
-        model.cuda()
-    else:
-        model = model.cuda()
-
 class CMCRetinaNet(L.LightningModule):
     def __init__(self,
                  cmc_backbone: str='resnet50v1',
@@ -26,15 +19,14 @@ class CMCRetinaNet(L.LightningModule):
         super().__init__()
 
         cmc = CMCResNets(name=cmc_backbone)
-        _unwrap_dataparallel(cmc_backbone, cmc)
 
         if cmc_weights_path:
             ckpt = torch.load(cmc_weights_path)
             cmc.load_state_dict(ckpt['model'])
     
         backbone = _dual_resnet_fpn_extractor(
-            backbone_l=cmc.encoder.l_to_ab, 
-            backbone_ab=cmc.encoder.ab_to_l, 
+            backbone_l=cmc.encoder.module.l_to_ab, 
+            backbone_ab=cmc.encoder.module.ab_to_l, 
             trainable_backbone_layers=trainable_backbone_layers, 
             returned_layers=[2, 3, 4], 
             extra_blocks=LastLevelP6P7(2048, 256)
