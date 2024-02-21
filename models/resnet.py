@@ -248,9 +248,9 @@ class InsResNet50(nn.Module):
         return self.encoder(x, layer)
 
 
-class ResNetV1(nn.Module):
+class CMCResNetV1(nn.Module):
     def __init__(self, name='resnet50'):
-        super(ResNetV1, self).__init__()
+        super(CMCResNetV1, self).__init__()
         if name == 'resnet50':
             self.l_to_ab = resnet50(in_channel=1, width=0.5)
             self.ab_to_l = resnet50(in_channel=2, width=0.5)
@@ -270,9 +270,9 @@ class ResNetV1(nn.Module):
         return feat_l, feat_ab
 
 
-class ResNetV2(nn.Module):
+class CMCResNetV2(nn.Module):
     def __init__(self, name='resnet50'):
-        super(ResNetV2, self).__init__()
+        super(CMCResNetV2, self).__init__()
         if name == 'resnet50':
             self.l_to_ab = resnet50(in_channel=1, width=1)
             self.ab_to_l = resnet50(in_channel=2, width=1)
@@ -292,9 +292,9 @@ class ResNetV2(nn.Module):
         return feat_l, feat_ab
 
 
-class ResNetV3(nn.Module):
+class CMCResNetV3(nn.Module):
     def __init__(self, name='resnet50'):
-        super(ResNetV3, self).__init__()
+        super(CMCResNetV3, self).__init__()
         if name == 'resnet50':
             self.l_to_ab = resnet50(in_channel=1, width=2)
             self.ab_to_l = resnet50(in_channel=2, width=2)
@@ -314,19 +314,19 @@ class ResNetV3(nn.Module):
         return feat_l, feat_ab
 
 
-class MyResNetsCMC(nn.Module):
+class CMCResNets(nn.Module):
     def __init__(self, name='resnet50v1'):
-        super(MyResNetsCMC, self).__init__()
+        super(CMCResNets, self).__init__()
         if name.endswith('v1'):
-            self.encoder = ResNetV1(name[:-2])
+            self.encoder = CMCResNetV1(name[:-2])
         elif name.endswith('v2'):
-            self.encoder = ResNetV2(name[:-2])
+            self.encoder = CMCResNetV2(name[:-2])
         elif name.endswith('v3'):
-            self.encoder = ResNetV3(name[:-2])
+            self.encoder = CMCResNetV3(name[:-2])
         else:
             raise NotImplementedError('model not support: {}'.format(name))
 
-        # self.encoder = nn.DataParallel(self.encoder)
+        self.encoder = nn.DataParallel(self.encoder)
 
     def forward(self, x, layer=7):
         return self.encoder(x, layer)

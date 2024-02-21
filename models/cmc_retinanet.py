@@ -6,8 +6,15 @@ import lightning as L
 from torchvision.models.detection.retinanet import RetinaNet
 from torchvision.ops.feature_pyramid_network import LastLevelP6P7
 
-from models.resnet import MyResNetsCMC
+from models.resnet import CMCResNets
 from models.backbone_utils import _dual_resnet_fpn_extractor
+
+def _unwrap_dataparallel(backbone: str, model: nn.DataParallel):
+    if backbone.startswith('alexnet') or backbone.startswith('vgg'):
+        model.features = model.features
+        model.cuda()
+    else:
+        model = model.cuda()
 
 class CMCRetinaNet(L.LightningModule):
     def __init__(self,
@@ -18,7 +25,9 @@ class CMCRetinaNet(L.LightningModule):
                  lr: float=1e-3):
         super().__init__()
 
-        cmc = MyResNetsCMC(name=cmc_backbone)
+        cmc = CMCResNets(name=cmc_backbone)
+        _unwrap_dataparallel(cmc_backbone, cmc)
+
         if cmc_weights_path:
             ckpt = torch.load(cmc_weights_path)
             cmc.load_state_dict(ckpt['model'])
