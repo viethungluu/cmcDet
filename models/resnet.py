@@ -326,7 +326,7 @@ class CMCResNets(nn.Module):
         else:
             raise NotImplementedError('model not support: {}'.format(name))
 
-        # self.encoder = nn.DataParallel(self.encoder)
+        self.encoder = nn.DataParallel(self.encoder)
 
     def forward(self, x, layer=7):
         return self.encoder(x, layer)
