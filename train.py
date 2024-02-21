@@ -15,7 +15,7 @@ def _parse_args():
     parser = argparse.ArgumentParser(description="Training CMCRetinaNet on Pascal VOC format")
     # model parameters
     parser.add_argument('--cmc-backbone', type=str, default='resnet50v1', 
-                        choices=["resnet50v1", "resnet50v2"],
+                        choices=["resnet50v1", "resnet50v2", "resnet50v3"],
                         help='Model type')
     parser.add_argument('--cmc-weights-path', type=str, default=None,
                         help='Path to CMC checkpoint')
@@ -31,8 +31,6 @@ def _parse_args():
                         help='Learning rate')
     parser.add_argument('--seed', type=int, default=28,
                         help='Random seed')
-    
-    # parser.add_argument('--rgb2bgr', action='store_true')
 
     args = parser.parse_args()
     return args
