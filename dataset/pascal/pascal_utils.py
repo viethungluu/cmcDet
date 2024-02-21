@@ -141,7 +141,7 @@ class PascalDataset(Dataset):
         target["labels"] = class_labels
         target["area"] = area
         target["iscrowd"] = iscrowd
-        return image, torch.tensor(target), image_idx
+        return image, target, image_idx
 
 
 def get_pascal(annot_dir, image_dir, image_set="train", **kwargs):
