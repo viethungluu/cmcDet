@@ -5,6 +5,7 @@ import lightning as L
 
 from torchvision.models.detection.retinanet import RetinaNet
 from torchvision.ops.feature_pyramid_network import LastLevelP6P7
+from torchmetrics.detection import MeanAveragePrecision
 
 from models.resnet import CMCResNets
 from models.backbone_utils import _dual_resnet_fpn_extractor
@@ -41,6 +42,8 @@ class CMCRetinaNet(L.LightningModule):
 
         self.lr = lr
 
+        self.metric = MeanAveragePrecision(iou_type="bbox")
+
     def forward(self, x):
         # return loss_dict in fit stage
         # return preds in inference (equal to model.eval())
@@ -53,15 +56,28 @@ class CMCRetinaNet(L.LightningModule):
         return optimizer
 
     def training_step(self, batch, batch_idx):
-        inputs, labels = batch
-        loss_dict = self(inputs, labels)
+        images, targets = batch
+        images = [img.float() for img in images]
+        targets = [{k: v for k, v in t.items()} for t in targets]  # Unpack the Targets
+        loss_dict = self.model(images, targets)
         losses = sum(loss for loss in loss_dict.values()) 
         self.log("train_loss", losses, on_step=False, on_epoch=True, prog_bar=True, logger=True)
         return {"loss": losses}
 
     def validation_step(self, batch, batch_idx):
-        inputs, labels = batch
-        loss_dict = self(inputs, labels)
-        losses = sum(loss for loss in loss_dict.values()) 
+        images, targets = batch
+        images = [img.float() for img in images]
+        targets = [{k: v for k, v in t.items()} for t in targets]  # Unpack the Targets
 
-        self.log('val_loss', losses, on_step=False, on_epoch=True, prog_bar=True, logger=True)
+        preds = self.model(images, targets)
+        self.metric.update(preds, targets)
+        map_dict = self.metric.compute()
+        self.log('map', map_dict['map'], on_step=False, on_epoch=True, prog_bar=True, logger=True)
+        self.log('map_small', map_dict['map_small'], on_step=False, on_epoch=True, prog_bar=True, logger=True)
+        self.log('map_medium', map_dict['map_medium'], on_step=False, on_epoch=True, prog_bar=True, logger=True)
+        self.log('map_large', map_dict['map_large'], on_step=False, on_epoch=True, prog_bar=True, logger=True)
+        self.log('mar_small', map_dict['mar_small'], on_step=False, on_epoch=True, prog_bar=True, logger=True)
+        self.log('mar_medium', map_dict['mar_medium'], on_step=False, on_epoch=True, prog_bar=True, logger=True)
+        self.log('mar_large', map_dict['mar_large'], on_step=False, on_epoch=True, prog_bar=True, logger=True)
+        self.log('map_50', map_dict['map_50'], on_step=False, on_epoch=True, prog_bar=True, logger=True)
+        self.log('map_75', map_dict['map_75'], on_step=False, on_epoch=True, prog_bar=True, logger=True)

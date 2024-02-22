@@ -7,14 +7,14 @@ import albumentations as A
 
 from dataset.pascal.pascal_dataset import PascalDataset
 from dataset.pascal.pascal_utils import convert_annotations_to_df
-from dataset.utils import remove_invalid_annots
+from dataset.utils import remove_invalid_annots, clip_invalid_annots, collate_fn
 from dataset.colorspace_transforms import RGB2Lab
 
 class PascalDataModule(L.LightningDataModule):
     def __init__(self,
                  dataset_path,
-                 train_batch_size=16,
-                 test_batch_size=8,
+                 train_batch_size=8,
+                 test_batch_size=4,
                  seed=28):
         super().__init__()
 
@@ -47,10 +47,12 @@ class PascalDataModule(L.LightningDataModule):
         train_transforms = A.Compose([
             A.HorizontalFlip(p=0.5),
             A.VerticalFlip(p=0.5),
-            colorspace_transform,
+            RGB2Lab()
         ], bbox_params=A.BboxParams(format='pascal_voc', label_fields=['class_labels']))
-        
-        test_transforms = A.Compose([colorspace_transform], bbox_params=A.BboxParams(format='pascal_voc', label_fields=['class_labels']))
+
+        test_transforms = A.Compose([
+            RGB2Lab()
+        ], bbox_params=A.BboxParams(format='pascal_voc', label_fields=['class_labels']))
 
         if stage == "fit" or stage is None:
             self.train_dataset  = PascalDataset(self.train_df, transforms=train_transforms)
@@ -63,18 +65,21 @@ class PascalDataModule(L.LightningDataModule):
             return DataLoader(self.train_dataset,
                               batch_size=self.train_batch_size,
                               shuffle=True,
-                              num_workers=2)
+                              num_workers=2,
+                              collate_fn= collate_fn)
 
     def val_dataloader(self):
         if self.val_dataset is not None:
             return DataLoader(self.val_dataset,
                               batch_size=self.test_batch_size,
                               shuffle=False,
-                              num_workers=2)
+                              num_workers=2,
+                              collate_fn= collate_fn)
 
     def predict_dataloader(self):
         if self.test_dataset is not None:
             return DataLoader(self.test_dataset,
                               batch_size=self.test_batch_size,
                               shuffle=False,
-                              num_workers=2)
+                              num_workers=2,
+                              collate_fn= collate_fn)

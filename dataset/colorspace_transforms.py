@@ -2,14 +2,16 @@ import numpy as np
 from skimage import color
 from PIL import Image
 
-class RGB2Lab(object):
+from albumentations.core.transforms_interface import ImageOnlyTransform
+
+class RGB2Lab(ImageOnlyTransform):
     """Convert RGB PIL image to ndarray Lab."""
     def __call__(self, image: Image, **kwargs):
         image = np.asarray(image, np.uint8)
         image = color.rgb2lab(image)
         return image
 
-class RGB2HSV(object):
+class RGB2HSV(ImageOnlyTransform):
     """Convert RGB PIL image to ndarray HSV."""
     def __call__(self, image: Image, **kwargs):
         image = np.asarray(image, np.uint8)
@@ -17,73 +19,73 @@ class RGB2HSV(object):
         return image
 
 
-class RGB2HED(object):
+class RGB2HED(ImageOnlyTransform):
     """Convert RGB PIL image to ndarray HED."""
-    def __call__(self, img: Image, **kwargs):
-        img = np.asarray(img, np.uint8)
-        img = color.rgb2hed(img)
-        return img
+    def __call__(self, image: Image, **kwargs):
+        image = np.asarray(image, np.uint8)
+        image = color.rgb2hed(image)
+        return image
 
 
-class RGB2LUV(object):
+class RGB2LUV(ImageOnlyTransform):
     """Convert RGB PIL image to ndarray LUV."""
-    def __call__(self, img: Image, **kwargs):
-        img = np.asarray(img, np.uint8)
-        img = color.rgb2luv(img)
-        return img
+    def __call__(self, image: Image, **kwargs):
+        image = np.asarray(image, np.uint8)
+        image = color.rgb2luv(image)
+        return image
 
 
-class RGB2YUV(object):
+class RGB2YUV(ImageOnlyTransform):
     """Convert RGB PIL image to ndarray YUV."""
-    def __call__(self, img: Image, **kwargs):
-        img = np.asarray(img, np.uint8)
-        img = color.rgb2yuv(img)
-        return img
+    def __call__(self, image: Image, **kwargs):
+        image = np.asarray(image, np.uint8)
+        image = color.rgb2yuv(image)
+        return image
 
 
-class RGB2XYZ(object):
+class RGB2XYZ(ImageOnlyTransform):
     """Convert RGB PIL image to ndarray XYZ."""
-    def __call__(self, img: Image, **kwargs):
-        img = np.asarray(img, np.uint8)
-        img = color.rgb2xyz(img)
-        return img
+    def __call__(self, image: Image, **kwargs):
+        image = np.asarray(image, np.uint8)
+        image = color.rgb2xyz(image)
+        return image
 
 
-class RGB2YCbCr(object):
+class RGB2YCbCr(ImageOnlyTransform):
     """Convert RGB PIL image to ndarray YCbCr."""
-    def __call__(self, img: Image, **kwargs):
-        img = np.asarray(img, np.uint8)
-        img = color.rgb2ycbcr(img)
-        return img
+    def __call__(self, image: Image, **kwargs):
+        image = np.asarray(image, np.uint8)
+        image = color.rgb2ycbcr(image)
+        return image
 
 
-class RGB2YDbDr(object):
+class RGB2YDbDr(ImageOnlyTransform):
     """Convert RGB PIL image to ndarray YDbDr."""
-    def __call__(self, img: Image, **kwargs):
-        img = np.asarray(img, np.uint8)
-        img = color.rgb2ydbdr(img)
-        return img
+    def __call__(self, image: Image, **kwargs):
+        image = np.asarray(image, np.uint8)
+        image = color.rgb2ydbdr(image)
+        return image
 
 
-class RGB2YPbPr(object):
+class RGB2YPbPr(ImageOnlyTransform):
     """Convert RGB PIL image to ndarray YPbPr."""
-    def __call__(self, img: Image, **kwargs):
-        img = np.asarray(img, np.uint8)
-        img = color.rgb2ypbpr(img)
-        return img
+    def __call__(self, image: Image, **kwargs):
+        image = np.asarray(image, np.uint8)
+        image = color.rgb2ypbpr(image)
+        return image
 
 
-class RGB2YIQ(object):
+class RGB2YIQ(ImageOnlyTransform):
     """Convert RGB PIL image to ndarray YIQ."""
-    def __call__(self, img: Image, **kwargs):
-        img = np.asarray(img, np.uint8)
-        img = color.rgb2yiq(img)
-        return img
+    def __call__(self, image: Image, **kwargs):
+        image = np.asarray(image, np.uint8)
+        image = color.rgb2yiq(image)
+        return image
 
 
-class RGB2CIERGB(object):
+class RGB2CIERGB(ImageOnlyTransform):
     """Convert RGB PIL image to ndarray RGBCIE."""
-    def __call__(self, img: Image, **kwargs):
-        img = np.asarray(img, np.uint8)
-        img = color.rgb2rgbcie(img)
-        return img
+    def __call__(self, image: Image, **kwargs):
+        image = np.asarray(image, np.uint8)
+        image = color.rgb2rgbcie(image)
+        return image

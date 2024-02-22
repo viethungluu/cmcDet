@@ -5,7 +5,6 @@ import xml.etree.ElementTree as ET
 
 import numpy as np
 import pandas as pd
-import torch
 from sklearn.preprocessing import LabelEncoder
 
 logger = logging.getLogger(__name__)
@@ -84,10 +83,3 @@ def generate_pascal_category_names(df: pd.DataFrame):
     CATEGORY_NAMES[0] = "__background__"
     return CATEGORY_NAMES
 
-def get_pascal(annot_dir, image_dir, image_set="train", **kwargs):
-    n = f"pascal_{image_set}.csv"
-    df = convert_annotations_to_df(annot_dir, image_dir, image_set)
-    df.to_csv(n, index=False)
-    logger.info(f"DataFrame generated is saved to {n}")
-    ds = PascalDataset(df, **kwargs)
-    return ds

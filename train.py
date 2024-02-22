@@ -24,9 +24,9 @@ def _parse_args():
                         help='Path to dataset in Pascal VOC format')
     parser.add_argument('--save-path', type=str, default=None,
                         help='Path to save the checkpoints and logs')
-    parser.add_argument('--train-batch-size', type=int, default=16,
+    parser.add_argument('--train-batch-size', type=int, default=8,
                         help='Training batch size')
-    parser.add_argument('--test-batch-size', type=int, default=8,
+    parser.add_argument('--test-batch-size', type=int, default=4,
                         help='Test/valid batch size')
     parser.add_argument('--lr', type=float, default=1e-3,
                         help='Learning rate')

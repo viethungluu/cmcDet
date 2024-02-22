@@ -1,6 +1,6 @@
 import torch
 from torch.utils.data import Dataset
-from torchvision import transforms
+import torchvision
 
 import numpy as np
 import pandas as pd
@@ -43,6 +43,7 @@ class PascalDataset(Dataset):
         self.transforms = transforms
         self.df = dataframe
         self.image_ids = self.df["filename"].unique()
+        self.to_tensor = torchvision.transforms.ToTensor()
 
     def __len__(self) -> int:
         return len(self.image_ids)
@@ -66,19 +67,21 @@ class PascalDataset(Dataset):
         # suppose all instances are not crowd
         iscrowd = torch.zeros((records.shape[0],), dtype=torch.int64)
 
-        # apply transformations        
+         # apply transformations
         if self.transforms:
             transformed = self.transforms(image=image, bboxes=boxes, class_labels=class_labels)
             image = transformed["image"]
-            boxes = torch.tensor(transformed["bboxes"], dtype=torch.float32)
-            class_labels = torch.tensor(transformed["class_labels"])
-            
-        image = transforms.to_tensor(image)
+            boxes = transformed["bboxes"]
+            class_labels = transformed["class_labels"]
+
+        image = self.to_tensor(image)
 
         # target dictionary
         target = {}
-        target['boxes'] = boxes
-        target["labels"] = class_labels
+        image_idx = torch.tensor([index])
+        target["image_id"] = image_idx
+        target['boxes'] = torch.as_tensor(boxes)
+        target["labels"] = torch.as_tensor(class_labels)
         target["area"] = area
         target["iscrowd"] = iscrowd
 
