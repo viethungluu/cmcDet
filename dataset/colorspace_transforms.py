@@ -4,17 +4,17 @@ from PIL import Image
 
 class RGB2Lab(object):
     """Convert RGB PIL image to ndarray Lab."""
-    def __call__(self, img: Image, **kwargs):
-        img = np.asarray(img, np.uint8)
-        img = color.rgb2lab(img)
-        return img
+    def __call__(self, image: Image, **kwargs):
+        image = np.asarray(image, np.uint8)
+        image = color.rgb2lab(image)
+        return image
 
 class RGB2HSV(object):
     """Convert RGB PIL image to ndarray HSV."""
-    def __call__(self, img: Image, **kwargs):
-        img = np.asarray(img, np.uint8)
-        img = color.rgb2hsv(img)
-        return img
+    def __call__(self, image: Image, **kwargs):
+        image = np.asarray(image, np.uint8)
+        image = color.rgb2hsv(image)
+        return image
 
 
 class RGB2HED(object):
