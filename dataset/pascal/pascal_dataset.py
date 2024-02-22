@@ -2,6 +2,7 @@ import torch
 from torch.utils.data import Dataset
 from torchvision import transforms
 
+import numpy as np
 import pandas as pd
 import cv2
 
@@ -75,12 +76,11 @@ class PascalDataset(Dataset):
         
         # target dictionary
         target = {}
-        target["image_id"] = image_idx
         target['boxes'] = torch.as_tensor(boxes)
         target["labels"] = torch.as_tensor(class_labels)
         target["area"] = area
         target["iscrowd"] = iscrowd
-
         image_idx = torch.tensor([index])
+        target["image_id"] = image_idx
 
         return image, target, image_idx

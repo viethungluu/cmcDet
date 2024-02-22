@@ -12,7 +12,6 @@ from models.cmc_retinanet import CMCRetinaNet
 from dataset.datamodule import PascalDataModule
 from dataset.pascal.pascal_utils import generate_pascal_category_names
 
-
 def _parse_args():
     parser = argparse.ArgumentParser(description="Training CMCRetinaNet on Pascal VOC format")
     # model parameters

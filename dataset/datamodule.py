@@ -7,13 +7,8 @@ from torchvision import transforms
 
 from dataset.pascal.pascal_dataset import PascalDataset
 from dataset.pascal.pascal_utils import convert_annotations_to_df
-from dataset.utils import RGB2Lab
-
-def remove_invalid_annots(df):
-    df = df[df.xmax > df.xmin]
-    df = df[df.ymax > df.ymin]
-    df.reset_index(inplace=True, drop=True)
-    return df
+from dataset.utils import remove_invalid_annots
+from dataset.colorspace_transforms import RGB2Lab
 
 class PascalDataModule(L.LightningDataModule):
     def __init__(self,
@@ -44,17 +39,13 @@ class PascalDataModule(L.LightningDataModule):
             self.test_df    = convert_annotations_to_df(self.test_dir, image_set="test")
             self.test_df    = remove_invalid_annots(self.test_df)
 
-        # image transform to Lab color space
-        # mean = [(0 + 100) / 2, (-86.183 + 98.233) / 2, (-107.857 + 94.478) / 2]
-        # std = [(100 - 0) / 2, (86.183 + 98.233) / 2, (107.857 + 94.478) / 2]
-        # normalize_transform = transforms.Normalize(mean=mean, std=std)
-
         color_transform = RGB2Lab()
 
-        transform = [color_transform,
-                     transforms.ToTensor(),
-                    #  normalize_transform
-                    ]
+        #  normalize_transform will be performed inside RetinaNet
+        transform = [
+                color_transform,
+                transforms.ToTensor(),
+        ]
 
         train_transform = transforms.Compose(transform)
         test_transform = transforms.Compose(transform)
