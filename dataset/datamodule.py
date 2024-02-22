@@ -44,16 +44,14 @@ class PascalDataModule(L.LightningDataModule):
         # ToTensor will be performed inside dataset
         # normalize will be performed inside RetinaNet
         # We will only do color transform to specific color space here
-        common_transforms = [
-            colorspace_transform
-        ]
-
-        train_transforms = A.Compose(common_transforms + [
+        train_transforms = A.Compose([
+            # A.GaussNoise(),
+            colorspace_transform,
             A.HorizontalFlip(p=0.5),
             A.VerticalFlip(p=0.5),
         ], bbox_params=A.BboxParams(format='pascal_voc'))
         
-        test_transforms = A.Compose(common_transforms)
+        test_transforms = A.Compose([colorspace_transform])
 
         if stage == "fit" or stage is None:
             self.train_dataset  = PascalDataset(self.train_df, transforms=train_transforms)
