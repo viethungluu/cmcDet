@@ -63,12 +63,12 @@ def handle_train(args):
         max_epochs=50,
         default_root_dir=args.save_path,
         callbacks=[
-            EarlyStopping(monitor="val_loss", mode="min", min_delta=0.01, patience=3),
+            EarlyStopping(monitor="map", mode="max", min_delta=0.01, patience=3),
             ModelCheckpoint(dirpath=os.path.join(args.save_path, "checkpoints"),
                             save_top_k=1,
                             verbose=True,
-                            monitor='val_loss',
-                            mode='min',
+                            monitor='map',
+                            mode='max',
                             filename='{epoch}-{val_loss:.2f}')
         ])
 
