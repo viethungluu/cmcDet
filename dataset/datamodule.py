@@ -45,10 +45,9 @@ class PascalDataModule(L.LightningDataModule):
         # normalize will be performed inside RetinaNet
         # We will only do color transform to specific color space here
         train_transforms = A.Compose([
-            # A.GaussNoise(),
-            colorspace_transform,
             A.HorizontalFlip(p=0.5),
             A.VerticalFlip(p=0.5),
+            colorspace_transform,
         ], bbox_params=A.BboxParams(format='pascal_voc', label_fields=['class_labels']))
         
         test_transforms = A.Compose([colorspace_transform], bbox_params=A.BboxParams(format='pascal_voc', label_fields=['class_labels']))
