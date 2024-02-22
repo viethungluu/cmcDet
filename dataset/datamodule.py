@@ -49,9 +49,9 @@ class PascalDataModule(L.LightningDataModule):
             colorspace_transform,
             A.HorizontalFlip(p=0.5),
             A.VerticalFlip(p=0.5),
-        ], bbox_params=A.BboxParams(format='pascal_voc'))
+        ], bbox_params=A.BboxParams(format='pascal_voc', label_fields=['class_labels']))
         
-        test_transforms = A.Compose([colorspace_transform], bbox_params=A.BboxParams(format='pascal_voc'))
+        test_transforms = A.Compose([colorspace_transform], bbox_params=A.BboxParams(format='pascal_voc', label_fields=['class_labels']))
 
         if stage == "fit" or stage is None:
             self.train_dataset  = PascalDataset(self.train_df, transforms=train_transforms)
