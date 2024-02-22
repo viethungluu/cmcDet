@@ -10,7 +10,7 @@ from lightning.pytorch.callbacks import ModelCheckpoint
 
 from models.cmc_retinanet import CMCRetinaNet
 from dataset.datamodule import PascalDataModule
-from dataset.pascal.pascal_transforms import generate_pascal_category_names
+from dataset.pascal.pascal_utils import generate_pascal_category_names
 
 
 def _parse_args():

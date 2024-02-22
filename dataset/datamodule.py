@@ -5,7 +5,8 @@ import lightning as L
 from torch.utils.data import DataLoader
 from torchvision import transforms
 
-from dataset.pascal.pascal_utils import convert_annotations_to_df, PascalDataset
+from dataset.pascal.pascal_dataset import PascalDataset
+from dataset.pascal.pascal_utils import convert_annotations_to_df
 from dataset.utils import RGB2Lab
 
 def remove_invalid_annots(df):
@@ -55,11 +56,7 @@ class PascalDataModule(L.LightningDataModule):
                     #  normalize_transform
                     ]
 
-        train_transform = transforms.Compose(transform + [
-            # transforms.RandomHorizontalFlip(p=0.5),
-            # transforms.RandomVerticalFlip(p=0.5),
-            # transforms.RandomRotation(degrees=15),
-        ])
+        train_transform = transforms.Compose(transform)
         test_transform = transforms.Compose(transform)
 
         if stage == "fit" or stage is None:
