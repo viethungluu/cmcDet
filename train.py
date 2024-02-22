@@ -37,6 +37,9 @@ def _parse_args():
     return args
 
 def handle_train(args):
+    # seed so that results are reproducible
+    L.seed_everything(args.seed)
+
     # loading data
     dm = PascalDataModule(dataset_path=args.dataset_path,
                           train_batch_size=args.train_batch_size,
@@ -50,7 +53,7 @@ def handle_train(args):
     image_std = [(100 - 0) / 2, (86.183 + 98.233) / 2, (107.857 + 94.478) / 2]
     model = CMCRetinaNet(cmc_backbone=args.cmc_backbone,
                          cmc_weights_path=args.cmc_weights_path,
-                         n_classes=len(label_map),
+                         n_classes=len(label_map) - 1,
                          image_mean=image_mean,
                          image_std=image_std,
                          lr=args.lr)

@@ -66,21 +66,20 @@ class PascalDataset(Dataset):
         # suppose all instances are not crowd
         iscrowd = torch.zeros((records.shape[0],), dtype=torch.int64)
 
-        # apply transformations
-        # transformed = self.transforms(image=im, bboxes=boxes, class_labels=class_labels)
-        # image = transformed["image"]
-        # boxes = torch.tensor(transformed["bboxes"], dtype=torch.float32)
-        # class_labels = torch.tensor(transformed["class_labels"])
+        # apply transformations        
         if self.transforms:
-            image, boxes = self.transforms(image, np.array(boxes))
-        
+            transformed = self.transforms(image=image, bboxes=boxes, class_labels=class_labels)
+            image = transformed["image"]
+            boxes = torch.tensor(transformed["bboxes"], dtype=torch.float32)
+            class_labels = torch.tensor(transformed["class_labels"])
+            
+        image = transforms.to_tensor(image)
+
         # target dictionary
         target = {}
-        target['boxes'] = torch.as_tensor(boxes)
-        target["labels"] = torch.as_tensor(class_labels)
+        target['boxes'] = boxes
+        target["labels"] = class_labels
         target["area"] = area
         target["iscrowd"] = iscrowd
-        image_idx = torch.tensor([index])
-        target["image_id"] = image_idx
 
-        return image, target, image_idx
+        return image, target

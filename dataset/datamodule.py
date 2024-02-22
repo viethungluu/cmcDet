@@ -3,7 +3,7 @@ import os
 import lightning as L
 
 from torch.utils.data import DataLoader
-from torchvision import transforms
+import albumentations as A
 
 from dataset.pascal.pascal_dataset import PascalDataset
 from dataset.pascal.pascal_utils import convert_annotations_to_df
@@ -39,22 +39,27 @@ class PascalDataModule(L.LightningDataModule):
             self.test_df    = convert_annotations_to_df(self.test_dir, image_set="test")
             self.test_df    = remove_invalid_annots(self.test_df)
 
-        color_transform = RGB2Lab()
+        colorspace_transform = RGB2Lab()
 
-        #  normalize_transform will be performed inside RetinaNet
-        transform = [
-                color_transform,
-                transforms.ToTensor(),
+        # ToTensor will be performed inside dataset
+        # normalize will be performed inside RetinaNet
+        # We will only do color transform to specific color space here
+        common_transforms = [
+            colorspace_transform
         ]
 
-        train_transform = transforms.Compose(transform)
-        test_transform = transforms.Compose(transform)
+        train_transforms = A.Compose(common_transforms + [
+            A.HorizontalFlip(p=0.5),
+            A.VerticalFlip(p=0.5),
+        ], bbox_params=A.BboxParams(format='pascal_voc'))
+        
+        test_transforms = A.Compose(common_transforms)
 
         if stage == "fit" or stage is None:
-            self.train_dataset  = PascalDataset(self.train_df, transforms=train_transform)
-            self.val_dataset    = PascalDataset(self.val_df, transforms=test_transform)
+            self.train_dataset  = PascalDataset(self.train_df, transforms=train_transforms)
+            self.val_dataset    = PascalDataset(self.val_df, transforms=test_transforms)
         else:
-            self.test_dataset   = PascalDataset(self.test_df, transforms=test_transform)
+            self.test_dataset   = PascalDataset(self.test_df, transforms=test_transforms)
 
     def train_dataloader(self):
         if self.train_dataset is not None:
