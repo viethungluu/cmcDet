@@ -15,7 +15,7 @@ from dataset.pascal.pascal_utils import generate_pascal_category_names
 def _parse_args():
     parser = argparse.ArgumentParser(description="Training CMCRetinaNet on Pascal VOC format")
     # model parameters
-    parser.add_argument('--cmc-backbone', type=str, default='resnet50v1', 
+    parser.add_argument('--cmc-backbone', type=str, default='resnet50v2', 
                         choices=["resnet50v1", "resnet50v2", "resnet50v3"],
                         help='Model type')
     parser.add_argument('--cmc-weights-path', type=str, default=None,
