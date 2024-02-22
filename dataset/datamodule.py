@@ -29,14 +29,17 @@ class PascalDataModule(L.LightningDataModule):
     def setup(self, stage):
         if os.path.isdir(self.train_dir):
             self.train_df = convert_annotations_to_df(self.train_dir, image_set="train")
+            self.train_df = clip_invalid_annots(self.train_df)
             self.train_df = remove_invalid_annots(self.train_df)
         
         if os.path.isdir(self.val_dir):
-            self.val_df = convert_annotations_to_df(self.val_dir, image_set="test")
-            self.val_df = remove_invalid_annots(self.val_df)
+            self.val_df     = convert_annotations_to_df(self.val_dir, image_set="test")
+            self.train_df   = clip_invalid_annots(self.train_df)
+            self.val_df     = remove_invalid_annots(self.val_df)
         
         if os.path.isdir(self.test_dir):
             self.test_df    = convert_annotations_to_df(self.test_dir, image_set="test")
+            self.train_df   = clip_invalid_annots(self.train_df)
             self.test_df    = remove_invalid_annots(self.test_df)
 
         colorspace_transform = RGB2Lab()
