@@ -96,6 +96,7 @@ def handle_train(args):
         if args.mc_weights_path:
             ckpt = torch.load(args.cmc_weights_path)
             cmc.load_state_dict(ckpt['model'])
+            args.backbone_choice = "dual+"
 
         backbone = _dual_resnet_fpn_extractor(
             backbone_l=cmc.encoder.module.l_to_ab, 
@@ -124,12 +125,12 @@ def handle_train(args):
         default_root_dir=args.save_path,
         callbacks=[
             EarlyStopping(monitor="map", mode="max", min_delta=0.01, patience=3),
-            ModelCheckpoint(dirpath=os.path.join(args.save_path, "checkpoints"),
+            ModelCheckpoint(dirpath=os.path.join(args.save_path, "checkpoints", args.backbone_choice),
                             save_top_k=1,
                             verbose=True,
                             monitor='map',
                             mode='max',
-                            filename='{0}-{epoch}-{map:.3f}'.format(args.backbone_choice))
+                            filename='{epoch}-{map:.3f}')
         ])
 
     trainer.fit(m, dm)
