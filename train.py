@@ -26,11 +26,6 @@ from dataset.colorspace_transforms import RGB2Lab
 
 def _parse_args():
     parser = argparse.ArgumentParser(description="Training CMCRetinaNet on Pascal VOC format")
-    # model parameters
-    subparsers = parser.add_subparsers(dest='backbone_choice', help='types of backbone model')
-    s_parser = subparsers.add_parser("single", help="Single-Stream backbone")
-    d_parser = subparsers.add_parser("dual", help="Dual-Stream backbone")
-    
     parser.add_argument('--dataset-path', type=str, default=None,
                         help='Path to dataset in Pascal VOC format')
     parser.add_argument('--save-path', type=str, default=None,
@@ -43,6 +38,10 @@ def _parse_args():
                         help='Learning rate')
     parser.add_argument('--seed', type=int, default=28,
                         help='Random seed')
+    # model parameters
+    subparsers = parser.add_subparsers(dest='backbone_choice', help='types of backbone model')
+    s_parser = subparsers.add_parser("single", help="Single-Stream backbone")
+    d_parser = subparsers.add_parser("dual", help="Dual-Stream backbone")   
 
     s_parser.add_argument('--resnet-backbone', type=str, default='resnet50', 
                         choices=["resnet50"],
