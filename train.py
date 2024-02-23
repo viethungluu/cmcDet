@@ -129,7 +129,7 @@ def handle_train(args):
                             verbose=True,
                             monitor='map',
                             mode='max',
-                            filename='{0}-{1}-{epoch}-{map:.3f}'.format(args.backbone_choice, 'pretrained' if args.mc_weights_path else 'scratch'))
+                            filename='{0}-{1}-{epoch}-{map:.3f}'.format(args.backbone_choice, 'pretrained' if args.cmc_weights_path else 'scratch'))
         ])
 
     trainer.fit(m, dm)
