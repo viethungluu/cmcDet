@@ -113,9 +113,8 @@ def handle_train(args):
                           image_std=image_std)
     else:
         model = retinanet_resnet50_fpn(
-                            weights=RetinaNet_ResNet50_FPN_Weights.COCO_V1,
+                            pretrained_backbone=True,
                             num_classes=len(label_map))
-    
     
     m = RetinaNetModule(model, lr=args.lr)
     
