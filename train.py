@@ -123,9 +123,9 @@ def handle_train(args):
 
         if args.pretrained:
             # replace classification layer 
-            num_anchors = model.head.classification_head.num_anchors
-            in_channels = model.head.classification_head.conv[0].out_channels
-            model.head = RetinaNetHead(in_channels, num_anchors, num_classes=num_classes)
+            in_features = model.box_predictor.cls_score.in_features
+            model.box_predictor.cls_score = nn.Linear(in_features, num_classes)
+            model.box_predictor.num_classes = num_classes
     
     m = RetinaNetModule(model, lr=args.lr)
     
