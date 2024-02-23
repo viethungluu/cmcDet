@@ -4,22 +4,33 @@ import argparse
 from PIL import Image
 
 import torch
+import torch.nn as nn
+
+import torchvision
+from torchvision.models.detection import RetinaNet_ResNet50_FPN_Weights
+from torchvision.models.detection.retinanet import RetinaNet, retinanet_resnet50_fpn
+from torchvision.ops.feature_pyramid_network import LastLevelP6P7
+
 import lightning as L
 from lightning.pytorch.callbacks.early_stopping import EarlyStopping
 from lightning.pytorch.callbacks import ModelCheckpoint
 
-from models.cmc_retinanet import CMCRetinaNet
+import albumentations as A
+
+from models.backbone_utils import _dual_resnet_fpn_extractor
+from models.resnet import CMCResNets
+from models.cmc_retinanet import RetinaNetModule
 from dataset.datamodule import PascalDataModule
 from dataset.pascal.pascal_utils import generate_pascal_category_names
+from dataset.colorspace_transforms import RGB2Lab
 
 def _parse_args():
     parser = argparse.ArgumentParser(description="Training CMCRetinaNet on Pascal VOC format")
     # model parameters
-    parser.add_argument('--cmc-backbone', type=str, default='resnet50v2', 
-                        choices=["resnet50v1", "resnet50v2", "resnet50v3"],
-                        help='Model type')
-    parser.add_argument('--cmc-weights-path', type=str, default=None,
-                        help='Path to CMC checkpoint')
+    subparsers = parser.add_subparsers(dest='backbone_choice', help='types of backbone model')
+    s_parser = subparsers.add_parser("single", help="Single-Stream backbone")
+    d_parser = subparsers.add_parser("dual", help="Dual-Stream backbone")
+    
     parser.add_argument('--dataset-path', type=str, default=None,
                         help='Path to dataset in Pascal VOC format')
     parser.add_argument('--save-path', type=str, default=None,
@@ -33,6 +44,18 @@ def _parse_args():
     parser.add_argument('--seed', type=int, default=28,
                         help='Random seed')
 
+    s_parser.add_argument('--resnet-backbone', type=str, default='resnet50', 
+                        choices=["resnet50"],
+                        help='Backbone type')
+
+    d_parser.add_argument('--cmc-backbone', type=str, default='resnet50v2', 
+                        choices=["resnet50v2"],
+                        help='Backbone type')
+    d_parser.add_argument('--cmc-weights-path', type=str, default=None,
+                        help='Path to CMC checkpoint')
+    d_parser.add_argument('--trainable-backbone-layers', type=int, default=0,
+                        help='Number of trainable backbone layers.')
+
     args = parser.parse_args()
     return args
 
@@ -40,23 +63,62 @@ def handle_train(args):
     # seed so that results are reproducible
     L.seed_everything(args.seed)
 
-    # loading data
+    if args.backbone_choice == "dual":
+        train_transforms = A.Compose([
+                                A.HorizontalFlip(p=0.5),
+                                A.VerticalFlip(p=0.5),
+                                RGB2Lab(),
+                            ], 
+                            bbox_params=A.BboxParams(format='pascal_voc', label_fields=['class_labels']))
+
+        test_transforms = A.Compose([
+                                RGB2Lab(),
+                            ],
+                            bbox_params=A.BboxParams(format='pascal_voc', label_fields=['class_labels']))
+    else:
+        train_transforms = A.Compose([
+                                A.HorizontalFlip(p=0.5),
+                                A.VerticalFlip(p=0.5),
+                            ],
+                            bbox_params=A.BboxParams(format='pascal_voc', label_fields=['class_labels']))
+        test_transforms = None
+
     dm = PascalDataModule(dataset_path=args.dataset_path,
                           train_batch_size=args.train_batch_size,
                           test_batch_size=args.test_batch_size,
+                          train_transforms=train_transforms,
+                          test_transforms=test_transforms,
                           seed=args.seed)
     dm.setup(stage="fit")
-
     label_map = generate_pascal_category_names(dm.train_df)
 
-    image_mean = [(0 + 100) / 2, (-86.183 + 98.233) / 2, (-107.857 + 94.478) / 2]
-    image_std = [(100 - 0) / 2, (86.183 + 98.233) / 2, (107.857 + 94.478) / 2]
-    model = CMCRetinaNet(cmc_backbone=args.cmc_backbone,
-                         cmc_weights_path=args.cmc_weights_path,
-                         n_classes=len(label_map),
-                         image_mean=image_mean,
-                         image_std=image_std,
-                         lr=args.lr)
+    if args.backbone_choice == "dual":
+        cmc = CMCResNets(name=args.cmc_backbone)
+        if args.mc_weights_path:
+            ckpt = torch.load(args.cmc_weights_path)
+            cmc.load_state_dict(ckpt['model'])
+
+        backbone = _dual_resnet_fpn_extractor(
+            backbone_l=cmc.encoder.module.l_to_ab, 
+            backbone_ab=cmc.encoder.module.ab_to_l, 
+            trainable_layers=args.trainable_backbone_layers, 
+            returned_layers=[2, 3, 4], 
+            extra_blocks=LastLevelP6P7(256, 256)
+        )
+
+        image_mean = [(0 + 100) / 2, (-86.183 + 98.233) / 2, (-107.857 + 94.478) / 2]
+        image_std = [(100 - 0) / 2, (86.183 + 98.233) / 2, (107.857 + 94.478) / 2]
+        model = RetinaNet(backbone,
+                          num_classes=len(label_map),
+                          image_mean=image_mean,
+                          image_std=image_std)
+    else:
+        model = retinanet_resnet50_fpn(
+                            weights=RetinaNet_ResNet50_FPN_Weights.COCO_V1,
+                            num_classes=len(label_map))
+    
+    
+    m = RetinaNetModule(model, lr=args.lr)
     
     # Training
     trainer = L.Trainer(
@@ -72,7 +134,7 @@ def handle_train(args):
                             filename='{epoch}-{val_loss:.2f}')
         ])
 
-    trainer.fit(model, dm)
+    trainer.fit(m, dm)
 
 def main():
     args = _parse_args()
