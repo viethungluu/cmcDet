@@ -1,14 +1,13 @@
 import os
 import numpy as np
 import argparse
-from PIL import Image
+import math
 
 import torch
 import torch.nn as nn
 
 import torchvision
-from torchvision.models.detection import RetinaNet_ResNet50_FPN_Weights
-from torchvision.models.detection.retinanet import RetinaNet, retinanet_resnet50_fpn
+from torchvision.models.detection.retinanet import RetinaNet, RetinaNetHead, retinanet_resnet50_fpn
 from torchvision.ops.feature_pyramid_network import LastLevelP6P7
 
 import lightning as L
@@ -46,6 +45,7 @@ def _parse_args():
     s_parser.add_argument('--resnet-backbone', type=str, default='resnet50', 
                         choices=["resnet50"],
                         help='Backbone type')
+    s_parser.add_argument('--pretrained', action='store_true')
     s_parser.add_argument('--pretrained-backbone', action='store_true')
 
     d_parser.add_argument('--cmc-backbone', type=str, default='resnet50v2', 
@@ -91,6 +91,7 @@ def handle_train(args):
                           seed=args.seed)
     dm.setup(stage="fit")
     label_map = generate_pascal_category_names(dm.train_df)
+    num_classes = len(label_map)
 
     if args.backbone_choice == "dual":
         cmc = CMCResNets(name=args.cmc_backbone)
@@ -110,13 +111,20 @@ def handle_train(args):
         image_mean = [(0 + 100) / 2, (-86.183 + 98.233) / 2, (-107.857 + 94.478) / 2]
         image_std = [(100 - 0) / 2, (86.183 + 98.233) / 2, (107.857 + 94.478) / 2]
         model = RetinaNet(backbone,
-                          num_classes=len(label_map),
+                          num_classes=num_classes,
                           image_mean=image_mean,
                           image_std=image_std)
-    else:
+    else:        
         model = retinanet_resnet50_fpn(
+                            pretrained=args.pretrained,
                             pretrained_backbone=args.pretrained_backbone,
-                            num_classes=len(label_map))
+                            num_classes=num_classes)
+
+        if args.pretrained:
+            # replace classification layer 
+            num_anchors = model.head.classification_head.num_anchors
+            in_channels = model.head.classification_head.conv[0].in_channels
+            model.head = RetinaNetHead(in_channels, num_anchors, num_classes=num_classes)
     
     m = RetinaNetModule(model, lr=args.lr)
     
