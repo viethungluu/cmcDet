@@ -46,6 +46,7 @@ def _parse_args():
     s_parser.add_argument('--resnet-backbone', type=str, default='resnet50', 
                         choices=["resnet50"],
                         help='Backbone type')
+    s_parser.add_argument('--pretrained-backbone', action='store_true')
 
     d_parser.add_argument('--cmc-backbone', type=str, default='resnet50v2', 
                         choices=["resnet50v2"],
@@ -114,7 +115,7 @@ def handle_train(args):
                           image_std=image_std)
     else:
         model = retinanet_resnet50_fpn(
-                            pretrained_backbone=True,
+                            pretrained_backbone=args.pretrained_backbone,
                             num_classes=len(label_map))
     
     m = RetinaNetModule(model, lr=args.lr)
