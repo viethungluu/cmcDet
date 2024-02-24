@@ -57,7 +57,7 @@ def _parse_args():
     s_parser.add_argument('--pretrained-backbone', action='store_true')
 
     d_parser.add_argument('--cmc-backbone', type=str, default='resnet50v2', 
-                        choices=["resnet50v2"],
+                        choices=["resnet50v2", "resnet50v3"],
                         help='Backbone type')
     d_parser.add_argument('--cmc-weights-path', type=str, default=None,
                         help='Path to CMC checkpoint')
@@ -111,12 +111,18 @@ def handle_train(args):
             cmc.load_state_dict(ckpt['model'])
             args.backbone_choice = "dual+"
 
+        if args.cmc_backbone.endswith("v3"):
+            extra_blocks = LastLevelP6P7(2048, 256)
+        else:
+            extra_blocks = LastLevelP6P7(256, 256)
+
+
         backbone = _dual_resnet_fpn_extractor(
             backbone_l=cmc.encoder.module.l_to_ab, 
             backbone_ab=cmc.encoder.module.ab_to_l, 
             trainable_layers=args.trainable_backbone_layers, 
             returned_layers=[2, 3, 4], 
-            extra_blocks=LastLevelP6P7(256, 256)
+            extra_blocks=extra_blocks
         )
 
         image_mean = [(0 + 100) / 2, (-86.183 + 98.233) / 2, (-107.857 + 94.478) / 2]
