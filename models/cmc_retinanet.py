@@ -34,7 +34,7 @@ class RetinaNetModule(L.LightningModule):
             return {
                 "optimizer": optimizer, 
                 "lr_scheduler": scheduler, 
-                "monitor": "map"
+                "monitor": "train_loss"
             }
 
         return optimizer
