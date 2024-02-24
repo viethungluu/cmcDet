@@ -83,7 +83,6 @@ class DualBackboneWithFPN(nn.Module):
 
 
 def _dual_resnet_fpn_extractor(
-    cmc_backbone: str,
     backbone_l: resnet.ResNet,
     backbone_ab: resnet.ResNet,
     trainable_layers: int,
