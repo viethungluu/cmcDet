@@ -117,7 +117,6 @@ def handle_train(args):
             extra_blocks = LastLevelP6P7(256, 256)
 
         backbone = _dual_resnet_fpn_extractor(
-            cmc_backbone=args.cmc_backbone,
             backbone_l=cmc.encoder.module.l_to_ab, 
             backbone_ab=cmc.encoder.module.ab_to_l, 
             trainable_layers=args.trainable_backbone_layers, 

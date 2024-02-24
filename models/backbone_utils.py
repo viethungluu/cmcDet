@@ -34,7 +34,6 @@ class DualBackboneWithFPN(nn.Module):
 
     def __init__(
         self,
-        cmc_backbone: str,
         backbone_l: nn.Module,
         backbone_ab: nn.Module,
         return_layers: Dict[str, str],
@@ -48,15 +47,13 @@ class DualBackboneWithFPN(nn.Module):
         if extra_blocks is None:
             extra_blocks = LastLevelMaxPool()
 
-        self.cmc_backbone = cmc_backbone
         self.body_l = IntermediateLayerGetter(backbone_l, return_layers=return_layers)
         self.body_ab = IntermediateLayerGetter(backbone_ab, return_layers=return_layers)
 
         # hard-code the number of returned layer [2, 3, 4]
-        if self.cmc_backbone.endswith("v3"):
-            self.conv1 = nn.Conv2d(in_channels_list[0] * 2, in_channels_list[0], kernel_size=1, stride=1, padding="same")
-            self.conv2 = nn.Conv2d(in_channels_list[1] * 2, in_channels_list[1], kernel_size=1, stride=1, padding="same")
-            self.conv3 = nn.Conv2d(in_channels_list[2] * 2, in_channels_list[2], kernel_size=1, stride=1, padding="same")
+        # self.conv1 = nn.Conv2d(in_channels_list[0] * 2, in_channels_list[0], kernel_size=1, stride=1, padding="same")
+        # self.conv2 = nn.Conv2d(in_channels_list[1] * 2, in_channels_list[1], kernel_size=1, stride=1, padding="same")
+        # self.conv3 = nn.Conv2d(in_channels_list[2] * 2, in_channels_list[2], kernel_size=1, stride=1, padding="same")
         
         self.fpn = FeaturePyramidNetwork(
             in_channels_list=in_channels_list,
@@ -74,13 +71,12 @@ class DualBackboneWithFPN(nn.Module):
         x = OrderedDict()
         for i, k in enumerate(x_l.keys()):
             x[k] = torch.cat((x_l[k], x_ab[k]), dim=1)
-            if self.cmc_backbone.endswith("v3"):
-                if i == 0:
-                    x[k] = self.conv1(x[k])
-                elif i == 1:
-                    x[k] = self.conv2(x[k])
-                elif i == 2:
-                    x[k] = self.conv3(x[k])
+            # if i == 0:
+            #     x[k] = self.conv1(x[k])
+            # elif i == 1:
+            #     x[k] = self.conv2(x[k])
+            # elif i == 2:
+            #     x[k] = self.conv3(x[k])
         
         x = self.fpn(x)
         return x
@@ -128,5 +124,5 @@ def _dual_resnet_fpn_extractor(
     in_channels_list = [in_channels_stage2 * 2 ** (i - 1) for i in returned_layers]
     out_channels = 256
     return DualBackboneWithFPN(
-        cmc_backbone, backbone_l, backbone_ab, return_layers, in_channels_list, out_channels, extra_blocks=extra_blocks, norm_layer=norm_layer
+        backbone_l, backbone_ab, return_layers, in_channels_list, out_channels, extra_blocks=extra_blocks, norm_layer=norm_layer
     )
