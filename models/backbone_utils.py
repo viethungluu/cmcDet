@@ -49,6 +49,13 @@ class DualBackboneWithFPN(nn.Module):
 
         self.body_l = IntermediateLayerGetter(backbone_l, return_layers=return_layers)
         self.body_ab = IntermediateLayerGetter(backbone_ab, return_layers=return_layers)
+
+        # hard-code the number of returned layer [2, 3, 4]
+        self.conv1 = nn.Conv2d(1024, 512, kernel_size=1, stride=1, padding="same")
+        self.conv2 = nn.Conv2d(2048, 1024, kernel_size=1, stride=1, padding="same")
+        self.conv3 = nn.Conv2d(4096, 2048, kernel_size=1, stride=1, padding="same")
+        self.convs = [self.conv1, self.conv2, self.conv3]
+
         self.fpn = FeaturePyramidNetwork(
             in_channels_list=in_channels_list,
             out_channels=out_channels,
@@ -63,8 +70,9 @@ class DualBackboneWithFPN(nn.Module):
         x_ab = self.body_ab(ab)
         
         x = OrderedDict()
-        for k in x_l.keys():
+        for i, k in enumerate(x_l.keys()):
             x[k] = torch.cat((x_l[k], x_ab[k]), dim=1)
+            x[k] = self.convs[i](x[k])
         
         x = self.fpn(x)
         return x
