@@ -41,6 +41,7 @@ def _parse_args():
                         help='Run val loop every 10 training epochs')
     parser.add_argument('--lr', type=float, default=1e-3,
                         help='Learning rate')
+    parser.add_argument('--mpt', help="Enable Mixed Precision Training", action='store_true')
     parser.add_argument('--seed', type=int, default=28,
                         help='Random seed')
     # model parameters
@@ -158,9 +159,15 @@ def handle_train(args):
                             filename='{epoch}-{map:.3f}')
         ])
 
+    kwarg = {}
+    if args.ckpt_path:
+        kwarg["ckpt_path"] = args.ckpt_path
+    if args.mpt:
+        kwarg["precision"] = 16
+    
     trainer.fit(m, 
                 dm,
-                ckpt_path=args.ckpt_path)
+                **kwarg)
 
 def main():
     args = _parse_args()
