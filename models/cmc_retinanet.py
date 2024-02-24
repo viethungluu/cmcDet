@@ -9,11 +9,13 @@ import lightning as L
 class RetinaNetModule(L.LightningModule):
     def __init__(self,
                  model,
-                 lr: float=1e-3):
+                 lr: float=1e-3,
+                 lr_decay: bool=False):
         super().__init__()
 
         self.model = model
         self.lr = lr
+        self.lr_decay = lr_decay
         self.metric = MeanAveragePrecision(iou_type="bbox")
 
     def forward(self, x):
@@ -26,12 +28,15 @@ class RetinaNetModule(L.LightningModule):
         params = [p for p in self.model.parameters() if p.requires_grad]
         optimizer = torch.optim.SGD(params, lr=self.lr, momentum=0.9, weight_decay=0.0005)
 
-        return {
-            "optimizer": optimizer,
-            "lr_scheduler": {
-                "scheduler": StepLR(optimizer, step_size=10, gamma=0.1)
-            },
-        }
+        if self.lr_decay:
+            return {
+                "optimizer": optimizer,
+                "lr_scheduler": {
+                    "scheduler": StepLR(optimizer, step_size=10, gamma=0.1)
+                },
+            }
+        
+        return optimizer
 
     def training_step(self, batch, batch_idx):
         images, targets = batch
