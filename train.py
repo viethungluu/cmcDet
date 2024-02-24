@@ -148,7 +148,8 @@ def handle_train(args):
             model.head = RetinaNetHead(in_channels, num_anchors, num_classes=num_classes)
     
     m = RetinaNetModule(model, 
-                        lr=args.lr)
+                        lr=args.lr,
+                        lr_decay=args.lr_decay)
     
     # Training
     trainer = L.Trainer(

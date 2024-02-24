@@ -7,11 +7,13 @@ import lightning as L
 class RetinaNetModule(L.LightningModule):
     def __init__(self,
                  model,
-                 lr: float=1e-3):
+                 lr: float=1e-3,
+                 lr_decay: bool=False):
         super().__init__()
 
         self.model = model
         self.lr = lr
+        self.lr_decay = lr_decay
         self.metric = MeanAveragePrecision(iou_type="bbox")
 
     def forward(self, x):
@@ -23,6 +25,14 @@ class RetinaNetModule(L.LightningModule):
         # select parameters that require gradient calculation
         params = [p for p in self.model.parameters() if p.requires_grad]
         optimizer = torch.optim.SGD(params, lr=self.lr, momentum=0.9, weight_decay=0.0005)
+
+        scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(
+            optimizer, mode="max"
+        )
+
+        if self.lr_decay:
+            return optimizer, scheduler
+
         return optimizer
 
     def training_step(self, batch, batch_idx):
