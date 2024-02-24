@@ -115,11 +115,9 @@ def _dual_resnet_fpn_extractor(
         raise ValueError(f"Each returned layer should be in the range [1,4]. Got {returned_layers}")
     return_layers = {f"layer{k}": str(v) for v, k in enumerate(returned_layers)}
 
-    if cmc_backbone.endswith("v3"):
-        in_channels_stage2 = backbone_l.inplanes // 8 * 2
-    else:
-        in_channels_stage2 = backbone_l.inplanes // 8
-
+    
+    in_channels_stage2 = backbone_l.inplanes // 8 * 2
+    # in_channels_stage2 = backbone_l.inplanes // 8
     in_channels_list = [in_channels_stage2 * 2 ** (i - 1) for i in returned_layers]
     out_channels = 256
     return DualBackboneWithFPN(
