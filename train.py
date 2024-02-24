@@ -29,6 +29,8 @@ def _parse_args():
                         help='Path to dataset in Pascal VOC format')
     parser.add_argument('--save-path', type=str, default=None,
                         help='Path to save the checkpoints and logs')
+    parser.add_argument('--ckpt-path', type=str, default=None,
+                        help='Path to saved checkpoint and resume training')
     parser.add_argument('--train-batch-size', type=int, default=8,
                         help='Training batch size')
     parser.add_argument('--test-batch-size', type=int, default=4,
@@ -94,6 +96,9 @@ def handle_train(args):
     num_classes = len(label_map)
 
     if args.backbone_choice == "dual":
+        if args.ckpt_path is not None:
+            args.mc_weights_path = None
+        
         cmc = CMCResNets(name=args.cmc_backbone)
         if args.mc_weights_path:
             ckpt = torch.load(args.cmc_weights_path)
@@ -114,7 +119,11 @@ def handle_train(args):
                           num_classes=num_classes,
                           image_mean=image_mean,
                           image_std=image_std)
-    else:        
+    else:
+        if args.ckpt_path is not None:
+            args.pretrained = False
+            args.pretrained_backbone = False
+
         model = retinanet_resnet50_fpn(
                             pretrained=args.pretrained,
                             pretrained_backbone=args.pretrained_backbone,
@@ -143,7 +152,9 @@ def handle_train(args):
                             filename='{epoch}-{map:.3f}')
         ])
 
-    trainer.fit(m, dm)
+    trainer.fit(m, 
+                dm,
+                ckpt_path=args.ckpt_path)
 
 def main():
     args = _parse_args()
