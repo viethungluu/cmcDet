@@ -24,7 +24,7 @@ from dataset.pascal.pascal_utils import generate_pascal_category_names
 from dataset.colorspace_transforms import RGB2Lab
 
 def _parse_args():
-    parser = argparse.ArgumentParser(description="Training CMCRetinaNet on Pascal VOC format")
+    parser = argparse.ArgumentParser(description="Training (CMC)RetinaNet on Pascal VOC format")
     parser.add_argument('--dataset-path', type=str, default=None,
                         help='Path to dataset in Pascal VOC format')
     parser.add_argument('--save-path', type=str, default=None,
@@ -100,7 +100,7 @@ def handle_train(args):
             args.mc_weights_path = None
         
         cmc = CMCResNets(name=args.cmc_backbone)
-        if args.mc_weights_path:
+        if args.cmc_weights_path:
             ckpt = torch.load(args.cmc_weights_path)
             cmc.load_state_dict(ckpt['model'])
             args.backbone_choice = "dual+"
