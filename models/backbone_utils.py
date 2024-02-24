@@ -128,5 +128,5 @@ def _dual_resnet_fpn_extractor(
     in_channels_list = [in_channels_stage2 * 2 ** (i - 1) for i in returned_layers]
     out_channels = 256
     return DualBackboneWithFPN(
-        backbone_l, backbone_ab, return_layers, in_channels_list, out_channels, extra_blocks=extra_blocks, norm_layer=norm_layer
+        cmc_backbone, backbone_l, backbone_ab, return_layers, in_channels_list, out_channels, extra_blocks=extra_blocks, norm_layer=norm_layer
     )
