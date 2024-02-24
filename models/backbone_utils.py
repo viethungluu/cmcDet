@@ -55,7 +55,7 @@ class DualBackboneWithFPN(nn.Module):
         # self.conv2 = nn.Conv2d(2048, 1024, kernel_size=1, stride=1, padding="same")
         # self.conv3 = nn.Conv2d(4096, 2048, kernel_size=1, stride=1, padding="same")
         self.convs = []
-        for i in range(in_channels_list):
+        for i in range(len(in_channels_list)):
             self.convs.append(nn.Conv2d(in_channels_list[i] * 2, in_channels_list[i], kernel_size=1, stride=1, padding="same"))
 
         self.fpn = FeaturePyramidNetwork(
