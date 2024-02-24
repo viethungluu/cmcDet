@@ -35,6 +35,10 @@ def _parse_args():
                         help='Training batch size')
     parser.add_argument('--test-batch-size', type=int, default=4,
                         help='Test/valid batch size')
+    parser.add_argument('--max-epochs', type=int, default=50,
+                        help='Max epochs')
+    parser.add_argument('--check-val-every-n-epoch', type=int, default=1,
+                        help='Run val loop every 10 training epochs')
     parser.add_argument('--lr', type=float, default=1e-3,
                         help='Learning rate')
     parser.add_argument('--seed', type=int, default=28,
@@ -140,7 +144,8 @@ def handle_train(args):
     
     # Training
     trainer = L.Trainer(
-        max_epochs=50,
+        max_epochs=args.max_epochs,
+        check_val_every_n_epoch=args.check_val_every_n_epoch,
         default_root_dir=args.save_path,
         callbacks=[
             LearningRateMonitor(logging_interval="epoch"),
