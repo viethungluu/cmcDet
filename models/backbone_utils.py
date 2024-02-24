@@ -75,12 +75,12 @@ class DualBackboneWithFPN(nn.Module):
         for i, k in enumerate(x_l.keys()):
             x[k] = torch.cat((x_l[k], x_ab[k]), dim=1)
             if self.cmc_backbone.endswith("v3"):
-                # if i == 0:
-                #     x[k] = self.conv1(x[k])
-                # elif i == 1:
-                #     x[k] = self.conv2(x[k])
-                # elif i == 2:
-                #     x[k] = self.conv3(x[k])
+                if i == 0:
+                    x[k] = self.conv1(x[k])
+                elif i == 1:
+                    x[k] = self.conv2(x[k])
+                elif i == 2:
+                    x[k] = self.conv3(x[k])
         
         x = self.fpn(x)
         return x
