@@ -51,10 +51,12 @@ class DualBackboneWithFPN(nn.Module):
         self.body_ab = IntermediateLayerGetter(backbone_ab, return_layers=return_layers)
 
         # hard-code the number of returned layer [2, 3, 4]
-        self.conv1 = nn.Conv2d(1024, 512, kernel_size=1, stride=1, padding="same")
-        self.conv2 = nn.Conv2d(2048, 1024, kernel_size=1, stride=1, padding="same")
-        self.conv3 = nn.Conv2d(4096, 2048, kernel_size=1, stride=1, padding="same")
-        self.convs = [self.conv1, self.conv2, self.conv3]
+        # self.conv1 = nn.Conv2d(1024, 512, kernel_size=1, stride=1, padding="same")
+        # self.conv2 = nn.Conv2d(2048, 1024, kernel_size=1, stride=1, padding="same")
+        # self.conv3 = nn.Conv2d(4096, 2048, kernel_size=1, stride=1, padding="same")
+        self.convs = []
+        for i in range(in_channels_list):
+            self.convs.append(nn.Conv2d(in_channels_list[i] * 2, in_channels_list[i], kernel_size=1, stride=1, padding="same"))
 
         self.fpn = FeaturePyramidNetwork(
             in_channels_list=in_channels_list,
