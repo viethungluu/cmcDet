@@ -12,7 +12,7 @@ from torchvision.ops.feature_pyramid_network import LastLevelP6P7
 
 import lightning as L
 from lightning.pytorch.callbacks.early_stopping import EarlyStopping
-from lightning.pytorch.callbacks import ModelCheckpoint
+from lightning.pytorch.callbacks import ModelCheckpoint, LearningRateMonitor
 
 import albumentations as A
 
@@ -30,7 +30,7 @@ def _parse_args():
     parser.add_argument('--save-path', type=str, default=None,
                         help='Path to save the checkpoints and logs')
     parser.add_argument('--ckpt-path', type=str, default=None,
-                        help='Path to saved checkpoint and resume training')
+                        help='Path/URL of the checkpoint from which training is resumed')
     parser.add_argument('--train-batch-size', type=int, default=8,
                         help='Training batch size')
     parser.add_argument('--test-batch-size', type=int, default=4,
@@ -143,6 +143,7 @@ def handle_train(args):
         max_epochs=50,
         default_root_dir=args.save_path,
         callbacks=[
+            LearningRateMonitor(logging_interval="epoch"),
             EarlyStopping(monitor="map", mode="max", min_delta=0.01, patience=3),
             ModelCheckpoint(dirpath=os.path.join(args.save_path, "checkpoints", args.backbone_choice),
                             save_top_k=1,
