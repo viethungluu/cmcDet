@@ -1,5 +1,5 @@
 import torch
-from torch.optim.lr_scheduler import StepLR
+from torch.optim.lr_scheduler import ReduceLROnPlateau
 from torchvision.models.detection.retinanet import RetinaNet
 from torchmetrics.detection import MeanAveragePrecision
 
@@ -32,7 +32,7 @@ class RetinaNetModule(L.LightningModule):
             return {
                 "optimizer": optimizer,
                 "lr_scheduler": {
-                    "scheduler": StepLR(optimizer, step_size=10, gamma=0.1)
+                    "scheduler": ReduceLROnPlateau(optimizer, 'min')
                 },
             }
         
