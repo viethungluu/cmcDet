@@ -1,8 +1,10 @@
 import torch
+from torch.optim.lr_scheduler import StepLR
 from torchvision.models.detection.retinanet import RetinaNet
 from torchmetrics.detection import MeanAveragePrecision
 
 import lightning as L
+
 
 class RetinaNetModule(L.LightningModule):
     def __init__(self,
@@ -23,7 +25,13 @@ class RetinaNetModule(L.LightningModule):
         # select parameters that require gradient calculation
         params = [p for p in self.model.parameters() if p.requires_grad]
         optimizer = torch.optim.SGD(params, lr=self.lr, momentum=0.9, weight_decay=0.0005)
-        return optimizer
+
+        return {
+            "optimizer": optimizer,
+            "lr_scheduler": {
+                "scheduler": StepLR(optimizer, step_size=10, gamma=0.1)
+            },
+        }
 
     def training_step(self, batch, batch_idx):
         images, targets = batch
