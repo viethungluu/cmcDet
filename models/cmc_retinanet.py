@@ -1,21 +1,17 @@
 import torch
-from torch.optim.lr_scheduler import ReduceLROnPlateau
 from torchvision.models.detection.retinanet import RetinaNet
 from torchmetrics.detection import MeanAveragePrecision
 
 import lightning as L
 
-
 class RetinaNetModule(L.LightningModule):
     def __init__(self,
                  model,
-                 lr: float=1e-3,
-                 lr_decay: bool=False):
+                 lr: float=1e-3):
         super().__init__()
 
         self.model = model
         self.lr = lr
-        self.lr_decay = lr_decay
         self.metric = MeanAveragePrecision(iou_type="bbox")
 
     def forward(self, x):
@@ -27,15 +23,6 @@ class RetinaNetModule(L.LightningModule):
         # select parameters that require gradient calculation
         params = [p for p in self.model.parameters() if p.requires_grad]
         optimizer = torch.optim.SGD(params, lr=self.lr, momentum=0.9, weight_decay=0.0005)
-
-        if self.lr_decay:
-            return {
-                "optimizer": optimizer,
-                "lr_scheduler": {
-                    "scheduler": ReduceLROnPlateau(optimizer, 'min')
-                },
-            }
-        
         return optimizer
 
     def training_step(self, batch, batch_idx):

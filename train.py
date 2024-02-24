@@ -143,8 +143,7 @@ def handle_train(args):
             model.head = RetinaNetHead(in_channels, num_anchors, num_classes=num_classes)
     
     m = RetinaNetModule(model, 
-                        lr=args.lr,
-                        lr_decay=args.lr_decay)
+                        lr=args.lr)
     
     # Training
     trainer = L.Trainer(
@@ -153,7 +152,7 @@ def handle_train(args):
         default_root_dir=args.save_path,
         callbacks=[
             LearningRateMonitor(logging_interval="epoch"),
-            EarlyStopping(monitor="map", mode="max", min_delta=0.01, patience=3),
+            EarlyStopping(monitor="map", mode="max", min_delta=0.01, patience=10),
             ModelCheckpoint(dirpath=os.path.join(args.save_path, "checkpoints", args.backbone_choice),
                             save_top_k=1,
                             verbose=True,
