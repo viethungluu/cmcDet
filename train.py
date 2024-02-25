@@ -161,7 +161,7 @@ def handle_train(args):
     
     kwargs = {}
     if args.mpt:
-        kwargs["precision"] = "bf16"
+        kwargs["precision"] = 16
     # Training
     trainer = L.Trainer(
         max_epochs=args.max_epochs,
