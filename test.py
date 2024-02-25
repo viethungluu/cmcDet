@@ -101,9 +101,6 @@ def handle_test(args):
                             )
 
     m = RetinaNetModule(model)
-    # m.load_from_checkpoint(
-    #     checkpoint_path=args.ckpt_path
-    # )
 
     # init trainer
     trainer = L.Trainer()

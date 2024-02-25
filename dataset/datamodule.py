@@ -77,7 +77,7 @@ class PascalDataModule(L.LightningDataModule):
                               num_workers=2,
                               collate_fn= collate_fn)
 
-    def predict_dataloader(self):
+    def test_dataloader(self):
         if self.test_dataset is not None:
             return DataLoader(self.test_dataset,
                               batch_size=self.test_batch_size,
