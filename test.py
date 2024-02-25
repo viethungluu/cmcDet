@@ -101,15 +101,17 @@ def handle_test(args):
                             )
 
     m = RetinaNetModule(model)
-    m.load_from_checkpoint(
-        checkpoint_path=args.ckpt_path
-    )
+    # m.load_from_checkpoint(
+    #     checkpoint_path=args.ckpt_path
+    # )
 
     # init trainer
     trainer = L.Trainer()
 
     # test (pass in the model)
-    trainer.test(model, dm)
+    trainer.test(model,
+                 dm,
+                 ckpt_path=args.ckpt_path)
 
 def main():
     args = _parse_args()
