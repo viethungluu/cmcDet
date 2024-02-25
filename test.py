@@ -64,7 +64,7 @@ def handle_test(args):
                           test_transforms=test_transforms,
                           seed=args.seed)
     dm.setup(stage="test")
-    label_map = generate_pascal_category_names(dm.test_df)
+    label_map = ['__background__', 'big bus', 'big truck', 'bus-l-', 'bus-s-', 'car', 'mid truck', 'small bus', 'small truck', 'truck-l-', 'truck-m-', 'truck-s-', 'truck-xl-']
     print(label_map)
     num_classes = len(label_map)
 
