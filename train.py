@@ -142,6 +142,7 @@ def handle_train(args):
         model = retinanet_resnet50_fpn(
                             pretrained=args.pretrained,
                             pretrained_backbone=args.pretrained_backbone,
+                            trainable_layers=args.trainable_backbone_layers, 
                             num_classes=91 if args.pretrained else num_classes,
                             )
 
