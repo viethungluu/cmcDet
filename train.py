@@ -159,6 +159,9 @@ def handle_train(args):
                         lr=args.lr,
                         lr_decay=args.lr_decay)
     
+    kwargs = {}
+    if args.mpt:
+        kwargs["precision"] = 16
     # Training
     trainer = L.Trainer(
         max_epochs=args.max_epochs,
@@ -173,17 +176,14 @@ def handle_train(args):
                             monitor='train_loss',
                             mode='min',
                             filename='{epoch}-{train_loss:.3f}')
-        ])
+        ],
+        **kwargs)
 
-    kwarg = {}
-    if args.ckpt_path:
-        kwarg["ckpt_path"] = args.ckpt_path
-    if args.mpt:
-        kwarg["precision"] = 16
+    
     
     trainer.fit(m, 
                 dm,
-                **kwarg)
+                ckpt_path=args.ckpt_path)
 
 def main():
     args = _parse_args()
