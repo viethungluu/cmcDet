@@ -105,6 +105,7 @@ def handle_train(args):
                           seed=args.seed)
     dm.setup(stage="fit")
     label_map = generate_pascal_category_names(dm.train_df)
+    print(label_map)
     num_classes = len(label_map)
 
     if args.backbone_choice == "dual":
