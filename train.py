@@ -166,7 +166,7 @@ def handle_train(args):
         default_root_dir=args.save_path,
         callbacks=[
             LearningRateMonitor(logging_interval="epoch"),
-            EarlyStopping(monitor="map", mode="max", min_delta=0.01, patience=15),
+            # EarlyStopping(monitor="map", mode="max", min_delta=0.01, patience=15),
             ModelCheckpoint(dirpath=os.path.join(args.save_path, "checkpoints", args.backbone_choice),
                             save_top_k=1,
                             verbose=True,
