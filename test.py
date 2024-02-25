@@ -36,6 +36,11 @@ def _parse_args():
                         help='Path/URL of the checkpoint from which training is resumed')
     parser.add_argument('--test-batch-size', type=int, default=4,
                         help='Test/valid batch size')
+    parser.add_argument('--trainable-backbone-layers', type=int, default=0,
+                        help='Number of trainable backbone layers.')
+    parser.add_argument('--cmc-backbone', type=str, default='resnet50v2', 
+                        choices=["resnet50v2", "resnet50v3"],
+                        help='Backbone type')
     parser.add_argument('--seed', type=int, default=28,
                         help='Random seed')
     
@@ -46,7 +51,49 @@ def handle_test(args):
     # seed so that results are reproducible
     L.seed_everything(args.seed)
 
-    model = RetinaNetModule.load_from_checkpoint(
+    dm = PascalDataModule(dataset_path=args.dataset_path,
+                          test_batch_size=args.test_batch_size,
+                          test_transforms=test_transforms,
+                          seed=args.seed)
+    dm.setup(stage="test")
+    label_map = generate_pascal_category_names(dm.test_df)
+    print(label_map)
+    num_classes = len(label_map)
+
+    if args.backbone_choice == "dual":
+        cmc = CMCResNets(name=args.cmc_backbone)
+        
+        if args.cmc_backbone.endswith("v3"):
+            extra_blocks = LastLevelP6P7(2048, 256)
+        else:
+            extra_blocks = LastLevelP6P7(256, 256)
+
+        backbone = _dual_resnet_fpn_extractor(
+            backbone_l=cmc.encoder.module.l_to_ab, 
+            backbone_ab=cmc.encoder.module.ab_to_l, 
+            trainable_layers=args.trainable_backbone_layers, 
+            returned_layers=[2, 3, 4], 
+            extra_blocks=extra_blocks
+        )
+
+        image_mean = [(0 + 100) / 2, (-86.183 + 98.233) / 2, (-107.857 + 94.478) / 2]
+        image_std = [(100 - 0) / 2, (86.183 + 98.233) / 2, (107.857 + 94.478) / 2]
+        model = RetinaNet(backbone,
+                          num_classes=num_classes,
+                          image_mean=image_mean,
+                          image_std=image_std)
+    else:
+        if args.ckpt_path is not None:
+            args.pretrained = False
+            args.pretrained_backbone = False
+
+        model = retinanet_resnet50_fpn(
+                            trainable_backbone_layers=args.trainable_backbone_layers, 
+                            num_classes=num_classes,
+                            )
+
+    m = RetinaNetModule(model)
+    m.load_from_checkpoint(
         checkpoint_path=args.ckpt_path
     )
 
@@ -58,13 +105,6 @@ def handle_test(args):
     else:
         test_transforms = None
 
-    dm = PascalDataModule(dataset_path=args.dataset_path,
-                          test_batch_size=args.test_batch_size,
-                          test_transforms=test_transforms,
-                          seed=args.seed)
-    dm.setup(stage="test")
-    label_map = generate_pascal_category_names(dm.test_df)
-    print(label_map)
 
     # init trainer
     trainer = L.Trainer()
