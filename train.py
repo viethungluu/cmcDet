@@ -47,7 +47,7 @@ def _parse_args():
     parser.add_argument('--mpt', help="Enable Mixed Precision Training", action='store_true')
     parser.add_argument('--seed', type=int, default=28,
                         help='Random seed')
-    parser.add_argument('--trainable-backbone-layers', type=int, default=0,
+    parser.add_argument('--trainable-backbone-layers', type=int, default=3,
                         help='Number of trainable backbone layers.')
     # model parameters
     subparsers = parser.add_subparsers(dest='backbone_choice', help='types of backbone model')

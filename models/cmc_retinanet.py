@@ -14,7 +14,7 @@ class RetinaNetModule(L.LightningModule):
         self.model = model
         self.lr = lr
         self.lr_decay = lr_decay
-        self.metric = MeanAveragePrecision(iou_type="bbox", backend='faster_coco_eval')
+        self.metric = MeanAveragePrecision(iou_type="bbox", backend='pycocotools')
 
     def forward(self, x):
         # return loss_dict in fit stage
