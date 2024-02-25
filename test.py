@@ -51,6 +51,14 @@ def handle_test(args):
     # seed so that results are reproducible
     L.seed_everything(args.seed)
 
+    if args.backbone_choice == "dual":
+        test_transforms = A.Compose([
+                                RGB2Lab(),
+                            ],
+                            bbox_params=A.BboxParams(format='pascal_voc', label_fields=['class_labels']))
+    else:
+        test_transforms = None
+
     dm = PascalDataModule(dataset_path=args.dataset_path,
                           test_batch_size=args.test_batch_size,
                           test_transforms=test_transforms,
@@ -96,15 +104,6 @@ def handle_test(args):
     m.load_from_checkpoint(
         checkpoint_path=args.ckpt_path
     )
-
-    if args.backbone_choice == "dual":
-        test_transforms = A.Compose([
-                                RGB2Lab(),
-                            ],
-                            bbox_params=A.BboxParams(format='pascal_voc', label_fields=['class_labels']))
-    else:
-        test_transforms = None
-
 
     # init trainer
     trainer = L.Trainer()
