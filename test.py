@@ -109,7 +109,7 @@ def handle_test(args):
     trainer = L.Trainer()
 
     # test (pass in the model)
-    trainer.test(model,
+    trainer.test(m,
                  dm,
                  ckpt_path=args.ckpt_path)
 
