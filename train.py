@@ -45,6 +45,8 @@ def _parse_args():
     parser.add_argument('--mpt', help="Enable Mixed Precision Training", action='store_true')
     parser.add_argument('--seed', type=int, default=28,
                         help='Random seed')
+    parser.add_argument('--trainable-backbone-layers', type=int, default=0,
+                        help='Number of trainable backbone layers.')
     # model parameters
     subparsers = parser.add_subparsers(dest='backbone_choice', help='types of backbone model')
     s_parser = subparsers.add_parser("single", help="Single-Stream backbone")
@@ -61,8 +63,6 @@ def _parse_args():
                         help='Backbone type')
     d_parser.add_argument('--cmc-weights-path', type=str, default=None,
                         help='Path to CMC checkpoint')
-    d_parser.add_argument('--trainable-backbone-layers', type=int, default=0,
-                        help='Number of trainable backbone layers.')
 
     args = parser.parse_args()
     return args
