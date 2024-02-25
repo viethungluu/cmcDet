@@ -14,7 +14,7 @@ class RetinaNetModule(L.LightningModule):
         self.model = model
         self.lr = lr
         self.lr_decay = lr_decay
-        self.metric = MeanAveragePrecision(iou_type="bbox")
+        self.metric = MeanAveragePrecision(iou_type="bbox", backend='faster_coco_eval')
 
     def forward(self, x):
         # return loss_dict in fit stage
@@ -56,23 +56,18 @@ class RetinaNetModule(L.LightningModule):
         preds = self.model(images, targets)
         self.metric.update(preds, targets)
         map_dict = self.metric.compute()
-        
-        log_dict = {
-            'map' : map_dict['map'],
-            'map_50': map_dict['map_50'],
-            'map_75': map_dict['map_75'],
-            'map_small': map_dict['map_small'],
-            'map_medium': map_dict['map_medium'],
-            'map_large': map_dict['map_large'],
-            'mar_1': map_dict['mar_1'],
-            'mar_10': map_dict['mar_10'],
-            'mar_100': map_dict['mar_100'],
-            'mar_small': map_dict['mar_small'],
-            'mar_medium': map_dict['mar_medium'],
-            'mar_large': map_dict['mar_large']
-        }
-
-        self.log(log_dict, on_step=False, on_epoch=True, prog_bar=True, logger=True, batch_size=len(images))
+        self.log('map', map_dict['map'], on_step=False, on_epoch=True, prog_bar=True, logger=True, batch_size=len(images))
+        self.log('map_50', map_dict['map_50'], on_step=False, on_epoch=True, prog_bar=True, logger=True, batch_size=len(images))
+        self.log('map_75', map_dict['map_75'], on_step=False, on_epoch=True, prog_bar=True, logger=True, batch_size=len(images))
+        self.log('map_small', map_dict['map_small'], on_step=False, on_epoch=True, prog_bar=True, logger=True, batch_size=len(images))
+        self.log('map_medium', map_dict['map_medium'], on_step=False, on_epoch=True, prog_bar=True, logger=True, batch_size=len(images))
+        self.log('map_large', map_dict['map_large'], on_step=False, on_epoch=True, prog_bar=True, logger=True, batch_size=len(images))
+        self.log('mar_1', map_dict['mar_1'], on_step=False, on_epoch=True, prog_bar=True, logger=True, batch_size=len(images))
+        self.log('mar_10', map_dict['mar_10'], on_step=False, on_epoch=True, prog_bar=True, logger=True, batch_size=len(images))
+        self.log('mar_100', map_dict['mar_100'], on_step=False, on_epoch=True, prog_bar=True, logger=True, batch_size=len(images))
+        self.log('mar_small', map_dict['mar_small'], on_step=False, on_epoch=True, prog_bar=True, logger=True, batch_size=len(images))
+        self.log('mar_medium', map_dict['mar_medium'], on_step=False, on_epoch=True, prog_bar=True, logger=True, batch_size=len(images))
+        self.log('mar_large', map_dict['mar_large'], on_step=False, on_epoch=True, prog_bar=True, logger=True, batch_size=len(images))
     
     def test_step(self, batch, batch_idx):
         images, targets = batch
@@ -82,19 +77,16 @@ class RetinaNetModule(L.LightningModule):
         preds = self.model(images, targets)
         self.metric.update(preds, targets)
         map_dict = self.metric.compute()
-        log_dict = {
-            'map' : map_dict['map'],
-            'map_50': map_dict['map_50'],
-            'map_75': map_dict['map_75'],
-            'map_small': map_dict['map_small'],
-            'map_medium': map_dict['map_medium'],
-            'map_large': map_dict['map_large'],
-            'mar_1': map_dict['mar_1'],
-            'mar_10': map_dict['mar_10'],
-            'mar_100': map_dict['mar_100'],
-            'mar_small': map_dict['mar_small'],
-            'mar_medium': map_dict['mar_medium'],
-            'mar_large': map_dict['mar_large']
-        }
-
-        self.log(log_dict, on_step=False, on_epoch=True, prog_bar=True, logger=True, batch_size=len(images))
+        self.log('map', map_dict['map'], on_step=False, on_epoch=True, prog_bar=True, logger=True, batch_size=len(images))
+        self.log('map_50', map_dict['map_50'], on_step=False, on_epoch=True, prog_bar=True, logger=True, batch_size=len(images))
+        self.log('map_75', map_dict['map_75'], on_step=False, on_epoch=True, prog_bar=True, logger=True, batch_size=len(images))
+        self.log('map_small', map_dict['map_small'], on_step=False, on_epoch=True, prog_bar=True, logger=True, batch_size=len(images))
+        self.log('map_medium', map_dict['map_medium'], on_step=False, on_epoch=True, prog_bar=True, logger=True, batch_size=len(images))
+        self.log('map_large', map_dict['map_large'], on_step=False, on_epoch=True, prog_bar=True, logger=True, batch_size=len(images))
+        self.log('mar_1', map_dict['mar_1'], on_step=False, on_epoch=True, prog_bar=True, logger=True, batch_size=len(images))
+        self.log('mar_10', map_dict['mar_10'], on_step=False, on_epoch=True, prog_bar=True, logger=True, batch_size=len(images))
+        self.log('mar_100', map_dict['mar_100'], on_step=False, on_epoch=True, prog_bar=True, logger=True, batch_size=len(images))
+        self.log('mar_small', map_dict['mar_small'], on_step=False, on_epoch=True, prog_bar=True, logger=True, batch_size=len(images))
+        self.log('mar_medium', map_dict['mar_medium'], on_step=False, on_epoch=True, prog_bar=True, logger=True, batch_size=len(images))
+        self.log('mar_large', map_dict['mar_large'], on_step=False, on_epoch=True, prog_bar=True, logger=True, batch_size=len(images))
+        
