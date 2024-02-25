@@ -73,8 +73,10 @@ def handle_train(args):
 
     if args.backbone_choice == "dual":
         train_transforms = A.Compose([
+                                A.Rotate(limit=15)
                                 A.HorizontalFlip(p=0.5),
                                 A.VerticalFlip(p=0.5),
+                                A.GaussNoise(),
                                 RGB2Lab(),
                             ], 
                             bbox_params=A.BboxParams(format='pascal_voc', label_fields=['class_labels']))
@@ -85,8 +87,10 @@ def handle_train(args):
                             bbox_params=A.BboxParams(format='pascal_voc', label_fields=['class_labels']))
     else:
         train_transforms = A.Compose([
+                                A.Rotate(limit=15)
                                 A.HorizontalFlip(p=0.5),
                                 A.VerticalFlip(p=0.5),
+                                A.GaussNoise(),
                             ],
                             bbox_params=A.BboxParams(format='pascal_voc', label_fields=['class_labels']))
         test_transforms = None

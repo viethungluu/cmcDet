@@ -27,7 +27,7 @@ class RetinaNetModule(L.LightningModule):
         optimizer = torch.optim.SGD(params, lr=self.lr, momentum=0.9, weight_decay=0.0005)
 
         scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(
-            optimizer, mode="max"
+            optimizer, mode="min"
         )
 
         if self.lr_decay:
