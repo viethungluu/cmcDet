@@ -57,7 +57,7 @@ class RetinaNetModule(L.LightningModule):
         self.metric.update(preds, targets)
         
     
-    def validation_epoch_end(self):
+    def on_validation_epoch_end(self):
         map_dict = self.metric.compute()
         self.log('map', map_dict['map'], on_step=False, on_epoch=True, prog_bar=True, logger=True, batch_size=len(images))
         self.log('map_50', map_dict['map_50'], on_step=False, on_epoch=True, prog_bar=True, logger=True, batch_size=len(images))
@@ -72,7 +72,7 @@ class RetinaNetModule(L.LightningModule):
         self.log('mar_medium', map_dict['mar_medium'], on_step=False, on_epoch=True, prog_bar=True, logger=True, batch_size=len(images))
         self.log('mar_large', map_dict['mar_large'], on_step=False, on_epoch=True, prog_bar=True, logger=True, batch_size=len(images))
         self.metric.reset()
-        
+
     def test_step(self, batch, batch_idx):
         images, targets = batch
         images = [img.float() for img in images]
@@ -81,7 +81,7 @@ class RetinaNetModule(L.LightningModule):
         preds = self.model(images, targets)
         self.metric.update(preds, targets)
     
-    def test_epoch_end(self):
+    def on_test_epoch_end(self):
         map_dict = self.metric.compute()
         self.log('map', map_dict['map'], on_step=False, on_epoch=True, prog_bar=True, logger=True, batch_size=len(images))
         self.log('map_50', map_dict['map_50'], on_step=False, on_epoch=True, prog_bar=True, logger=True, batch_size=len(images))
