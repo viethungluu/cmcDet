@@ -142,8 +142,8 @@ def handle_train(args):
             args.pretrained_backbone = False
 
         model = retinanet_resnet50_fpn(
-                            pretrained=RetinaNet_ResNet50_FPN_Weights.COCO_V1 if args.pretrained else None,
-                            pretrained_backbone=ResNet50_Weights.IMAGENET1K_V1 if args.pretrained_backbone else None,
+                            weights=RetinaNet_ResNet50_FPN_Weights.COCO_V1 if args.pretrained else None,
+                            weights_backbone=ResNet50_Weights.IMAGENET1K_V1 if args.pretrained_backbone else None,
                             trainable_backbone_layers=args.trainable_backbone_layers, 
                             num_classes=91 if args.pretrained else num_classes,
                             )
