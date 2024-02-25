@@ -73,7 +73,7 @@ def handle_train(args):
 
     if args.backbone_choice == "dual":
         train_transforms = A.Compose([
-                                A.Rotate(limit=15)
+                                A.Rotate(limit=15),
                                 A.HorizontalFlip(p=0.5),
                                 A.VerticalFlip(p=0.5),
                                 A.GaussNoise(),
