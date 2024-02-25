@@ -173,9 +173,9 @@ def handle_train(args):
             ModelCheckpoint(dirpath=os.path.join(args.save_path, "checkpoints", args.backbone_choice),
                             save_top_k=1,
                             verbose=True,
-                            monitor='train_loss',
-                            mode='min',
-                            filename='{epoch}-{train_loss:.3f}')
+                            monitor='map',
+                            mode='max',
+                            filename='{epoch}-{train_loss:.3f}-{map:.3f}')
         ],
         **kwargs)
 
