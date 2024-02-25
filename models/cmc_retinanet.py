@@ -59,9 +59,9 @@ class RetinaNetModule(L.LightningModule):
     
     def on_validation_epoch_end(self):
         map_dict = self.metric.compute()
-        self.log('map', map_dict, prog_bar=True, logger=True)
-        
-        # map_dict = self.metric.compute()
+        # self.log('map', map_dict, prog_bar=True, logger=True)
+        self.log('map', map_dict['map'], on_step=False, on_epoch=True, prog_bar=True, logger=True)
+        self.log('map_50', map_dict['map_50'], on_step=False, on_epoch=True, prog_bar=True, logger=True)
         # self.log('map', map_dict['map'], on_step=False, on_epoch=True, prog_bar=True, logger=True, batch_size=len(images))
         # self.log('map_50', map_dict['map_50'], on_step=False, on_epoch=True, prog_bar=True, logger=True, batch_size=len(images))
         # self.log('map_75', map_dict['map_75'], on_step=False, on_epoch=True, prog_bar=True, logger=True, batch_size=len(images))
@@ -86,10 +86,9 @@ class RetinaNetModule(L.LightningModule):
     
     def on_test_epoch_end(self):
         map_dict = self.metric.compute()
-        self.log('map', map_dict, prog_bar=True, logger=True)
-
-        # self.log('map', map_dict['map'], on_step=False, on_epoch=True, prog_bar=True, logger=True, batch_size=len(images))
-        # self.log('map_50', map_dict['map_50'], on_step=False, on_epoch=True, prog_bar=True, logger=True, batch_size=len(images))
+        # self.log('map', map_dict, prog_bar=True, logger=True)
+        self.log('map', map_dict['map'], on_step=False, on_epoch=True, prog_bar=True, logger=True)
+        self.log('map_50', map_dict['map_50'], on_step=False, on_epoch=True, prog_bar=True, logger=True)
         # self.log('map_75', map_dict['map_75'], on_step=False, on_epoch=True, prog_bar=True, logger=True, batch_size=len(images))
         # self.log('map_small', map_dict['map_small'], on_step=False, on_epoch=True, prog_bar=True, logger=True, batch_size=len(images))
         # self.log('map_medium', map_dict['map_medium'], on_step=False, on_epoch=True, prog_bar=True, logger=True, batch_size=len(images))
