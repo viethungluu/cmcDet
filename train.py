@@ -9,8 +9,8 @@ import torch.nn as nn
 import torchvision
 from torchvision.models.detection.retinanet import RetinaNet, RetinaNetHead, retinanet_resnet50_fpn
 from torchvision.ops.feature_pyramid_network import LastLevelP6P7
-from torchvision.model.detection import RetinaNet_ResNet50_FPN_Weights
-from torchvision.model import ResNet50_Weights
+from torchvision.models.detection import RetinaNet_ResNet50_FPN_Weights
+from torchvision.models import ResNet50_Weights
 
 import lightning as L
 from lightning.pytorch.callbacks.early_stopping import EarlyStopping
