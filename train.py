@@ -55,9 +55,7 @@ def _parse_args():
     s_parser = subparsers.add_parser("single", help="Single-Stream backbone")
     d_parser = subparsers.add_parser("dual", help="Dual-Stream backbone")   
 
-    s_parser.add_argument('--resnet-backbone', type=str, default='resnet50', 
-                        choices=["resnet50"],
-                        help='Backbone type')
+    s_parser.add_argument('--v2', action='store_true')
     s_parser.add_argument('--pretrained', action='store_true')
     s_parser.add_argument('--pretrained-backbone', action='store_true')
 
@@ -155,7 +153,12 @@ def handle_train(args):
             args.pretrained = False
             args.pretrained_backbone = False
 
-        model = retinanet_resnet50_fpn(
+        if args.v2:
+            retinanet_fnc = retinanet_resnet50_fpn_v2
+        else:
+            retinanet_fnc = retinanet_resnet50_fpn
+        
+        model = retinanet_fnc(
                             weights=RetinaNet_ResNet50_FPN_Weights.COCO_V1 if args.pretrained else None,
                             weights_backbone=ResNet50_Weights.IMAGENET1K_V1 if args.pretrained_backbone else None,
                             trainable_backbone_layers=args.trainable_backbone_layers, 
