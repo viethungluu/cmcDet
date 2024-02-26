@@ -67,7 +67,7 @@ class RetinaNetModule(L.LightningModule):
         targets = [{k: v for k, v in t.items()} for t in targets]  # Unpack the Targets
         loss_dict = self.model(images, targets)
         losses = sum(loss for loss in loss_dict.values()) 
-        self.log("train_loss", losses, on_step=False, on_epoch=True, prog_bar=True, logger=True, batch_size=len(images))
+        self.log("train_loss", losses, on_step=True, on_epoch=True, prog_bar=True, logger=True, batch_size=len(images))
         return {"loss": losses}
 
     def validation_step(self, batch, batch_idx):
