@@ -7,7 +7,7 @@ import torch
 import torch.nn as nn
 
 import torchvision
-from torchvision.models.detection.retinanet import RetinaNet, RetinaNetHead, retinanet_resnet50_fpn
+from torchvision.models.detection.retinanet import RetinaNet, RetinaNetHead, retinanet_resnet50_fpn, retinanet_resnet50_fpn_v2
 from torchvision.ops.feature_pyramid_network import LastLevelP6P7
 from torchvision.models.detection import RetinaNet_ResNet50_FPN_Weights
 from torchvision.models import ResNet50_Weights
@@ -41,6 +41,7 @@ def _parse_args():
     parser.add_argument('--cmc-backbone', type=str, default='resnet50v2', 
                         choices=["resnet50v2", "resnet50v3"],
                         help='Backbone type')
+    parser.add_argument('--v2', action='store_true')
     parser.add_argument('--seed', type=int, default=28,
                         help='Random seed')
     
@@ -94,11 +95,16 @@ def handle_test(args):
         if args.ckpt_path is not None:
             args.pretrained = False
             args.pretrained_backbone = False
-
-        model = retinanet_resnet50_fpn(
-                            trainable_backbone_layers=args.trainable_backbone_layers, 
-                            num_classes=num_classes,
-                            )
+        
+        if args.v2:
+            model = retinanet_resnet50_fpn_v2(
+                                trainable_backbone_layers=args.trainable_backbone_layers, 
+                                num_classes=num_classes,)
+        else:        
+            model = retinanet_resnet50_fpn(
+                                trainable_backbone_layers=args.trainable_backbone_layers, 
+                                num_classes=num_classes,
+                                )
 
     m = RetinaNetModule(model)
 
