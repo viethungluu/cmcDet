@@ -10,13 +10,16 @@ class RetinaNetModule(L.LightningModule):
                  model,
                  lr: float=1e-3,
                  lr_scheduler: str=None,
-                 last_epoch=-1):
+                 warmup_epochs: int=1,
+                 last_epoch:int=-1):
         super().__init__()
 
         self.model = model
         self.lr = lr
         self.lr_scheduler = lr_scheduler
+        self.warmup_epochs = warmup_epochs
         self.last_epoch = last_epoch
+
         self.metric = MeanAveragePrecision(iou_type="bbox", backend='pycocotools')
 
     def forward(self, x):
@@ -38,9 +41,8 @@ class RetinaNetModule(L.LightningModule):
         elif self.lr_scheduler == "LinearWarmupCosineAnnealingLR":
             scheduler = pl_bolts.optimizers.lr_scheduler.LinearWarmupCosineAnnealingLR(
                 optimizer, 
-                warmup_epochs=10,
+                warmup_epochs=self.warmup_epochs,
                 max_epochs=100,
-                warmup_start_lr=1e-3,
                 last_epoch=self.last_epoch
             )
         else:

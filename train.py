@@ -39,6 +39,8 @@ def _parse_args():
                         help='Test/valid batch size')
     parser.add_argument('--max-epochs', type=int, default=50,
                         help='Max epochs')
+    parser.add_argument('--warmup-epochs', type=int, default=1,
+                        help='Warmup epochs')
     parser.add_argument('--check-val-every-n-epoch', type=int, default=1,
                         help='Run val loop every 10 training epochs')
     parser.add_argument('--lr', type=float, default=1e-3,
@@ -177,7 +179,8 @@ def handle_train(args):
     
     m = RetinaNetModule(model, 
                         lr=args.lr,
-                        lr_scheduler=args.lr_scheduler)
+                        lr_scheduler=args.lr_scheduler,
+                        warmup_epochs=args.warmup_epochs)
     
     kwargs = {}
     if args.mpt:
