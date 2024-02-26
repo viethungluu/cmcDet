@@ -3,17 +3,18 @@ from torchvision.models.detection.retinanet import RetinaNet
 from torchmetrics.detection import MeanAveragePrecision
 
 import lightning as L
+import pl_bolts
 
 class RetinaNetModule(L.LightningModule):
     def __init__(self,
                  model,
                  lr: float=1e-3,
-                 lr_decay: bool=False):
+                 lr_scheduler: str=None):
         super().__init__()
 
         self.model = model
         self.lr = lr
-        self.lr_decay = lr_decay
+        self.lr_scheduler = lr_scheduler
         self.metric = MeanAveragePrecision(iou_type="bbox", backend='pycocotools')
 
     def forward(self, x):
@@ -26,9 +27,18 @@ class RetinaNetModule(L.LightningModule):
         params = [p for p in self.model.parameters() if p.requires_grad]
         optimizer = torch.optim.SGD(params, lr=self.lr, momentum=0.9, weight_decay=0.0005)
 
-        scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(
-            optimizer, T_max=100
-        )
+        if self.lr_scheduler == "CosineAnnealingLR":
+            scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(
+                optimizer, T_max=100
+            )
+        elif self.lr_scheduler == "LinearWarmupCosineAnnealingLR":
+            scheduler = pl_bolts.optimizers.lr_scheduler.LinearWarmupCosineAnnealingLR(
+                optimizer, T_max=100
+            )
+        else:
+            scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(
+                optimizer, mode="min"
+            )
 
         if self.lr_decay:
             return {

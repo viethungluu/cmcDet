@@ -43,7 +43,8 @@ def _parse_args():
                         help='Run val loop every 10 training epochs')
     parser.add_argument('--lr', type=float, default=1e-3,
                         help='Learning rate')
-    parser.add_argument('--lr-decay', action='store_true')
+    parser.add_argument('--lr-scheduler', type=str, default=None,
+                        help='Learning rate scheduler')
     parser.add_argument('--mpt', help="Enable Mixed Precision Training", action='store_true')
     parser.add_argument('--seed', type=int, default=28,
                         help='Random seed')
@@ -157,7 +158,7 @@ def handle_train(args):
     
     m = RetinaNetModule(model, 
                         lr=args.lr,
-                        lr_decay=args.lr_decay)
+                        lr_scheduler=args.lr_scheduler)
     
     kwargs = {}
     if args.mpt:
