@@ -102,6 +102,10 @@ def handle_test(args):
                                 trainable_backbone_layers=args.trainable_backbone_layers, 
                                 num_classes=num_classes
                                 )
+        
+        num_anchors = model.head.classification_head.num_anchors
+        in_channels = model.backbone.out_channels
+        model.head = RetinaNetHead(in_channels, num_anchors, num_classes=num_classes)
 
     m = RetinaNetModule(model)
 
