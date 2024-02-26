@@ -94,14 +94,9 @@ def handle_test(args):
             args.pretrained_backbone = False
         
         if args.v2:
-            model = retinanet_resnet50_fpn_v2(
-                                trainable_backbone_layers=args.trainable_backbone_layers, 
-                                num_classes=num_classes)
+            model = retinanet_resnet50_fpn_v2()
         else:        
-            model = retinanet_resnet50_fpn(
-                                trainable_backbone_layers=args.trainable_backbone_layers, 
-                                num_classes=num_classes
-                                )
+            model = retinanet_resnet50_fpn()
         
         num_anchors = model.head.classification_head.num_anchors
         in_channels = model.backbone.out_channels

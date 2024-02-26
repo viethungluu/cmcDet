@@ -7,8 +7,10 @@ import torch
 import torch.nn as nn
 
 import torchvision
-from torchvision.models.detection.retinanet import RetinaNet, RetinaNetHead, retinanet_resnet50_fpn
+from torchvision.models.detection.retinanet import RetinaNet, RetinaNetHead, retinanet_resnet50_fpn, retinanet_resnet50_fpn_v2
 from torchvision.ops.feature_pyramid_network import LastLevelP6P7
+from torchvision.models.detection import RetinaNet_ResNet50_FPN_Weights, RetinaNet_ResNet50_FPN_V2_Weights
+from torchvision.models import ResNet50_Weights
 
 import lightning as L
 from lightning.pytorch.callbacks.early_stopping import EarlyStopping
@@ -37,31 +39,33 @@ def _parse_args():
                         help='Test/valid batch size')
     parser.add_argument('--max-epochs', type=int, default=50,
                         help='Max epochs')
+    parser.add_argument('--warmup-epochs', type=int, default=1,
+                        help='Warmup epochs')
     parser.add_argument('--check-val-every-n-epoch', type=int, default=1,
                         help='Run val loop every 10 training epochs')
     parser.add_argument('--lr', type=float, default=1e-3,
                         help='Learning rate')
+    parser.add_argument('--lr-scheduler', type=str, default=None,
+                        help='Learning rate scheduler')
     parser.add_argument('--mpt', help="Enable Mixed Precision Training", action='store_true')
     parser.add_argument('--seed', type=int, default=28,
                         help='Random seed')
+    parser.add_argument('--trainable-backbone-layers', type=int, default=3,
+                        help='Number of trainable backbone layers.')
     # model parameters
     subparsers = parser.add_subparsers(dest='backbone_choice', help='types of backbone model')
     s_parser = subparsers.add_parser("single", help="Single-Stream backbone")
     d_parser = subparsers.add_parser("dual", help="Dual-Stream backbone")   
 
-    s_parser.add_argument('--resnet-backbone', type=str, default='resnet50', 
-                        choices=["resnet50"],
-                        help='Backbone type')
+    s_parser.add_argument('--v2', action='store_true')
     s_parser.add_argument('--pretrained', action='store_true')
     s_parser.add_argument('--pretrained-backbone', action='store_true')
 
     d_parser.add_argument('--cmc-backbone', type=str, default='resnet50v2', 
-                        choices=["resnet50v2"],
+                        choices=["resnet50v2", "resnet50v3"],
                         help='Backbone type')
     d_parser.add_argument('--cmc-weights-path', type=str, default=None,
                         help='Path to CMC checkpoint')
-    d_parser.add_argument('--trainable-backbone-layers', type=int, default=0,
-                        help='Number of trainable backbone layers.')
 
     args = parser.parse_args()
     return args
@@ -72,8 +76,10 @@ def handle_find_lr(args):
 
     if args.backbone_choice == "dual":
         train_transforms = A.Compose([
+                                A.Rotate(limit=15),
                                 A.HorizontalFlip(p=0.5),
                                 A.VerticalFlip(p=0.5),
+                                A.GaussNoise(),
                                 RGB2Lab(),
                             ], 
                             bbox_params=A.BboxParams(format='pascal_voc', label_fields=['class_labels']))
@@ -84,8 +90,10 @@ def handle_find_lr(args):
                             bbox_params=A.BboxParams(format='pascal_voc', label_fields=['class_labels']))
     else:
         train_transforms = A.Compose([
+                                A.Rotate(limit=15),
                                 A.HorizontalFlip(p=0.5),
                                 A.VerticalFlip(p=0.5),
+                                A.GaussNoise(),
                             ],
                             bbox_params=A.BboxParams(format='pascal_voc', label_fields=['class_labels']))
         test_transforms = None
@@ -98,7 +106,14 @@ def handle_find_lr(args):
                           seed=args.seed)
     dm.setup(stage="fit")
     label_map = generate_pascal_category_names(dm.train_df)
+    print(label_map)
     num_classes = len(label_map)
+
+    if args.ckpt_path is not None:
+        filename = os.path.basename(args.ckpt_path)
+        last_epoch = filename.split("-")[0]
+        last_epoch = last_epoch.split("=")[0]
+        last_epoch = _parse_int(last_epoch)
 
     if args.backbone_choice == "dual":
         if args.ckpt_path is not None:
@@ -110,12 +125,14 @@ def handle_find_lr(args):
             cmc.load_state_dict(ckpt['model'])
             args.backbone_choice = "dual+"
 
+        extra_blocks = LastLevelP6P7(256, 256)
+
         backbone = _dual_resnet_fpn_extractor(
             backbone_l=cmc.encoder.module.l_to_ab, 
             backbone_ab=cmc.encoder.module.ab_to_l, 
             trainable_layers=args.trainable_backbone_layers, 
             returned_layers=[2, 3, 4], 
-            extra_blocks=LastLevelP6P7(256, 256)
+            extra_blocks=extra_blocks
         )
 
         image_mean = [(0 + 100) / 2, (-86.183 + 98.233) / 2, (-107.857 + 94.478) / 2]
@@ -129,11 +146,20 @@ def handle_find_lr(args):
             args.pretrained = False
             args.pretrained_backbone = False
 
-        model = retinanet_resnet50_fpn(
-                            pretrained=args.pretrained,
-                            pretrained_backbone=args.pretrained_backbone,
-                            num_classes=91 if args.pretrained else num_classes,
-                            )
+        if args.v2:
+            model = retinanet_resnet50_fpn_v2(
+                                weights=RetinaNet_ResNet50_FPN_V2_Weights.COCO_V1 if args.pretrained else None,
+                                weights_backbone=ResNet50_Weights.IMAGENET1K_V2 if args.pretrained_backbone else None,
+                                trainable_backbone_layers=args.trainable_backbone_layers, 
+                                num_classes=91 if args.pretrained else num_classes,
+                                )
+        else:        
+            model = retinanet_resnet50_fpn(
+                                weights=RetinaNet_ResNet50_FPN_Weights.COCO_V1 if args.pretrained else None,
+                                weights_backbone=ResNet50_Weights.IMAGENET1K_V1 if args.pretrained_backbone else None,
+                                trainable_backbone_layers=args.trainable_backbone_layers, 
+                                num_classes=91 if args.pretrained else num_classes,
+                                )
 
         if args.pretrained:
             # replace classification layer 
@@ -141,7 +167,10 @@ def handle_find_lr(args):
             in_channels = model.backbone.out_channels
             model.head = RetinaNetHead(in_channels, num_anchors, num_classes=num_classes)
     
-    m = RetinaNetModule(model, lr=args.lr)
+    m = RetinaNetModule(model, 
+                        lr=args.lr,
+                        lr_scheduler=args.lr_scheduler,
+                        warmup_epochs=args.warmup_epochs)
 
     # Learning Rate Finder
     from lightning.pytorch.tuner import Tuner
@@ -152,7 +181,10 @@ def handle_find_lr(args):
                               train_dataloaders=dm.train_dataloader(),
                               val_dataloaders=dm.val_dataloader())
     lr_finder.suggestion()
-    lr_finder.plot()
+    
+    fig = lr_finder.plot(suggest=True)
+    fig.savefig("lr_curve.png")
+
 
 def main():
     args = _parse_args()
