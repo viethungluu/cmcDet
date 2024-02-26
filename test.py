@@ -72,10 +72,7 @@ def handle_test(args):
     if args.backbone_choice == "dual":
         cmc = CMCResNets(name=args.cmc_backbone)
         
-        if args.cmc_backbone.endswith("v3"):
-            extra_blocks = LastLevelP6P7(2048, 256)
-        else:
-            extra_blocks = LastLevelP6P7(256, 256)
+        extra_blocks = LastLevelP6P7(256, 256)
 
         backbone = _dual_resnet_fpn_extractor(
             backbone_l=cmc.encoder.module.l_to_ab, 
@@ -99,11 +96,11 @@ def handle_test(args):
         if args.v2:
             model = retinanet_resnet50_fpn_v2(
                                 trainable_backbone_layers=args.trainable_backbone_layers, 
-                                num_classes=num_classes,)
+                                num_classes=num_classes)
         else:        
             model = retinanet_resnet50_fpn(
                                 trainable_backbone_layers=args.trainable_backbone_layers, 
-                                num_classes=num_classes,
+                                num_classes=num_classes
                                 )
 
     m = RetinaNetModule(model)
