@@ -43,7 +43,7 @@ class RetinaNetModule(L.LightningModule):
                 optimizer, mode="min"
             )
 
-        if self.lr_decay:
+        if scheduler:
             return {
                 "optimizer": optimizer, 
                 "lr_scheduler": scheduler, 
