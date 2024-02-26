@@ -33,7 +33,10 @@ class RetinaNetModule(L.LightningModule):
             )
         elif self.lr_scheduler == "LinearWarmupCosineAnnealingLR":
             scheduler = pl_bolts.optimizers.lr_scheduler.LinearWarmupCosineAnnealingLR(
-                optimizer, T_max=100
+                optimizer, 
+                warmup_epochs=10,
+                max_epochs=100,
+                warmup_start_lr=1e-3
             )
         else:
             scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(
