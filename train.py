@@ -70,6 +70,12 @@ def _parse_args():
     args = parser.parse_args()
     return args
 
+def _parse_int(s):
+    try:
+        return int(s)
+    except ValueError:
+        return -1
+
 def handle_train(args):
     # seed so that results are reproducible
     L.seed_everything(args.seed)
@@ -108,6 +114,12 @@ def handle_train(args):
     label_map = generate_pascal_category_names(dm.train_df)
     print(label_map)
     num_classes = len(label_map)
+
+    if args.ckpt_path is not None:
+        filename = os.path.basename(args.ckpt_path)
+        last_epoch = filename.split("-")[0]
+        last_epoch = last_epoch.split("=")[0]
+        last_epoch = _parse_int(last_epoch)
 
     if args.backbone_choice == "dual":
         if args.ckpt_path is not None:
