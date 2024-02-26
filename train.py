@@ -9,7 +9,7 @@ import torch.nn as nn
 import torchvision
 from torchvision.models.detection.retinanet import RetinaNet, RetinaNetHead, retinanet_resnet50_fpn, retinanet_resnet50_fpn_v2
 from torchvision.ops.feature_pyramid_network import LastLevelP6P7
-from torchvision.models.detection import RetinaNet_ResNet50_FPN_Weights
+from torchvision.models.detection import RetinaNet_ResNet50_FPN_Weights, RetinaNet_ResNet50_FPN_V2_Weights
 from torchvision.models import ResNet50_Weights
 
 import lightning as L
@@ -154,16 +154,19 @@ def handle_train(args):
             args.pretrained_backbone = False
 
         if args.v2:
-            retinanet_fnc = retinanet_resnet50_fpn_v2
-        else:
-            retinanet_fnc = retinanet_resnet50_fpn
-        
-        model = retinanet_fnc(
-                            weights=RetinaNet_ResNet50_FPN_Weights.COCO_V1 if args.pretrained else None,
-                            weights_backbone=ResNet50_Weights.IMAGENET1K_V1 if args.pretrained_backbone else None,
-                            trainable_backbone_layers=args.trainable_backbone_layers, 
-                            num_classes=91 if args.pretrained else num_classes,
-                            )
+            model = retinanet_resnet50_fpn_v2(
+                                weights=RetinaNet_ResNet50_FPN_V2_Weights.COCO_V1 if args.pretrained else None,
+                                weights_backbone=ResNet50_Weights.IMAGENET1K_V2 if args.pretrained_backbone else None,
+                                trainable_backbone_layers=args.trainable_backbone_layers, 
+                                num_classes=91 if args.pretrained else num_classes,
+                                )
+        else:        
+            model = retinanet_resnet50_fpn(
+                                weights=RetinaNet_ResNet50_FPN_Weights.COCO_V1 if args.pretrained else None,
+                                weights_backbone=ResNet50_Weights.IMAGENET1K_V1 if args.pretrained_backbone else None,
+                                trainable_backbone_layers=args.trainable_backbone_layers, 
+                                num_classes=91 if args.pretrained else num_classes,
+                                )
 
         if args.pretrained:
             # replace classification layer 
