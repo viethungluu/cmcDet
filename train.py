@@ -131,10 +131,6 @@ def handle_train(args):
             cmc.load_state_dict(ckpt['model'])
             args.backbone_choice = "dual+"
 
-        # if args.cmc_backbone.endswith("v3"):
-        #     extra_blocks = LastLevelP6P7(2048, 256)
-        # else:
-            # extra_blocks = LastLevelP6P7(256, 256)
         extra_blocks = LastLevelP6P7(256, 256)
 
         backbone = _dual_resnet_fpn_extractor(

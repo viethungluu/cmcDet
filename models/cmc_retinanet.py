@@ -45,10 +45,12 @@ class RetinaNetModule(L.LightningModule):
                 max_epochs=100,
                 last_epoch=self.last_epoch
             )
-        else:
+        elif self.lr_scheduler == "ReduceLROnPlateau":
             scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(
                 optimizer, mode="min"
             )
+        else:
+            scheduler = None
 
         if scheduler:
             return {
