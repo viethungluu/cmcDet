@@ -52,12 +52,14 @@ def _parse_args():
                         help='Random seed')
     parser.add_argument('--trainable-backbone-layers', type=int, default=3,
                         help='Number of trainable backbone layers.')
+    parser.add_argument('--v2', action='store_true')
+
     # model parameters
     subparsers = parser.add_subparsers(dest='backbone_choice', help='types of backbone model')
     s_parser = subparsers.add_parser("single", help="Single-Stream backbone")
     d_parser = subparsers.add_parser("dual", help="Dual-Stream backbone")   
 
-    s_parser.add_argument('--v2', action='store_true')
+    
     s_parser.add_argument('--pretrained', action='store_true')
     s_parser.add_argument('--pretrained-backbone', action='store_true')
 
