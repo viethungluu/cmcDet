@@ -134,7 +134,7 @@ def handle_train(args):
             args.backbone_choice = "dual+"
 
         if args.v2:
-            extra_blocks = LastLevelP6P7(8192, 256)
+            extra_blocks = LastLevelP6P7(4096, 256)
         else:
             extra_blocks = LastLevelP6P7(256, 256)
 
