@@ -200,7 +200,7 @@ def handle_train(args):
             LearningRateMonitor(logging_interval="epoch"),
             # EarlyStopping(monitor="map", mode="max", min_delta=0.01, patience=15),
             ModelCheckpoint(dirpath=os.path.join(args.save_path, "checkpoints", args.backbone_choice),
-                            save_top_k=1,
+                            save_top_k=2,
                             verbose=True,
                             monitor='map',
                             mode='max',
