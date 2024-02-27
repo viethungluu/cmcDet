@@ -87,7 +87,7 @@ def handle_train(args):
                                 A.Rotate(limit=15),
                                 A.HorizontalFlip(p=0.5),
                                 A.VerticalFlip(p=0.5),
-                                A.GaussNoise(),
+                                # A.GaussNoise(),
                                 RGB2Lab(),
                             ], 
                             bbox_params=A.BboxParams(format='pascal_voc', label_fields=['class_labels']))
