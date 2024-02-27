@@ -50,11 +50,6 @@ class DualBackboneWithFPN(nn.Module):
         self.body_l = IntermediateLayerGetter(backbone_l, return_layers=return_layers)
         self.body_ab = IntermediateLayerGetter(backbone_ab, return_layers=return_layers)
 
-        # hard-code the number of returned layer [2, 3, 4]
-        # self.conv1 = nn.Conv2d(in_channels_list[0] * 2, in_channels_list[0], kernel_size=1, stride=1, padding="same")
-        # self.conv2 = nn.Conv2d(in_channels_list[1] * 2, in_channels_list[1], kernel_size=1, stride=1, padding="same")
-        # self.conv3 = nn.Conv2d(in_channels_list[2] * 2, in_channels_list[2], kernel_size=1, stride=1, padding="same")
-        
         self.fpn = FeaturePyramidNetwork(
             in_channels_list=in_channels_list,
             out_channels=out_channels,
@@ -71,12 +66,6 @@ class DualBackboneWithFPN(nn.Module):
         x = OrderedDict()
         for i, k in enumerate(x_l.keys()):
             x[k] = torch.cat((x_l[k], x_ab[k]), dim=1)
-            # if i == 0:
-            #     x[k] = self.conv1(x[k])
-            # elif i == 1:
-            #     x[k] = self.conv2(x[k])
-            # elif i == 2:
-            #     x[k] = self.conv3(x[k])
         
         x = self.fpn(x)
         return x
@@ -111,6 +100,7 @@ def _dual_resnet_fpn_extractor(
 
     if returned_layers is None:
         returned_layers = [1, 2, 3, 4]
+        
     if min(returned_layers) <= 0 or max(returned_layers) >= 5:
         raise ValueError(f"Each returned layer should be in the range [1,4]. Got {returned_layers}")
     return_layers = {f"layer{k}": str(v) for v, k in enumerate(returned_layers)}
