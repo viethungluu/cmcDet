@@ -49,6 +49,13 @@ class RetinaNetModule(L.LightningModule):
             scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(
                 optimizer, mode="min"
             )
+        elif self.lr_scheduler == "CosineAnnealingWarmRestarts":
+            scheduler = torch.optim.lr_scheduler.CosineAnnealingWarmRestarts(
+                optimizer,
+                T_max=100,
+                T_0=10,
+                eta_min=1e-3
+            )
         else:
             scheduler = None
 

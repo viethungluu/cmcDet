@@ -122,6 +122,8 @@ def handle_train(args):
         last_epoch = filename.split("-")[0]
         last_epoch = last_epoch.split("=")[0]
         last_epoch = _parse_int(last_epoch)
+    else:
+        last_epoch = -1
 
     if args.backbone_choice == "dual":
         if args.ckpt_path is not None:
@@ -181,7 +183,8 @@ def handle_train(args):
     m = RetinaNetModule(model, 
                         lr=args.lr,
                         lr_scheduler=args.lr_scheduler,
-                        warmup_epochs=args.warmup_epochs)
+                        warmup_epochs=args.warmup_epochs,
+                        last_epoch=last_epoch)
     
     kwargs = {}
     if args.mpt:
