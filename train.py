@@ -135,8 +135,10 @@ def handle_train(args):
             cmc.load_state_dict(ckpt['model'])
             args.backbone_choice = "dual+"
 
-        if args.v2:
+        if args.v2 and args.cmc_backbone == "resnet50v2":
             extra_blocks = LastLevelP6P7(4096, 256)
+        elif args.v2 and args.cmc_backbone == "resnet50v3":
+            extra_blocks = LastLevelP6P7(8192, 256)
         else:
             extra_blocks = LastLevelP6P7(256, 256)
 
