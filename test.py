@@ -36,6 +36,8 @@ def _parse_args():
                         help='Path/URL of the checkpoint from which training is resumed')
     parser.add_argument('--test-batch-size', type=int, default=4,
                         help='Test/valid batch size')
+    parser.add_argument('--num-classes', type=int, required=True,
+                        help='Number of classess')
     parser.add_argument('--trainable-backbone-layers', type=int, default=0,
                         help='Number of trainable backbone layers.')
     parser.add_argument('--cmc-backbone', type=str, default='resnet50v2', 
@@ -65,10 +67,7 @@ def handle_test(args):
                           test_transforms=test_transforms,
                           seed=args.seed)
     dm.setup(stage="test")
-    label_map = ['__background__', 'big bus', 'big truck', 'bus-l-', 'bus-s-', 'car', 'mid truck', 'small bus', 'small truck', 'truck-l-', 'truck-m-', 'truck-s-', 'truck-xl-']
-    print(label_map)
-    num_classes = len(label_map)
-
+    
     if args.backbone_choice == "dual":
         cmc = CMCResNets(name=args.cmc_backbone)
         
@@ -90,7 +89,7 @@ def handle_test(args):
         image_mean = [(0 + 100) / 2, (-86.183 + 98.233) / 2, (-107.857 + 94.478) / 2]
         image_std = [(100 - 0) / 2, (86.183 + 98.233) / 2, (107.857 + 94.478) / 2]
         model = RetinaNet(backbone,
-                          num_classes=num_classes,
+                          num_classes=args.num_classes,
                           image_mean=image_mean,
                           image_std=image_std)
     else:
@@ -101,7 +100,7 @@ def handle_test(args):
         
         num_anchors = model.head.classification_head.num_anchors
         in_channels = model.backbone.out_channels
-        model.head = RetinaNetHead(in_channels, num_anchors, num_classes=num_classes)
+        model.head = RetinaNetHead(in_channels, num_anchors, num_classes=args.num_classes)
 
     m = RetinaNetModule(model)
 
