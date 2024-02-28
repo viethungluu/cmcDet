@@ -53,6 +53,7 @@ class RetinaNetModule(L.LightningModule):
             scheduler = torch.optim.lr_scheduler.CosineAnnealingWarmRestarts(
                 optimizer,
                 T_0=10,
+                T_mult=2,
                 eta_min=1e-3,
                 last_epoch=self.last_epoch
             )
