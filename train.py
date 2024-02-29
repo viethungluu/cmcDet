@@ -39,14 +39,18 @@ def _parse_args():
                         help='Test/valid batch size')
     parser.add_argument('--max-epochs', type=int, default=50,
                         help='Max epochs')
-    parser.add_argument('--warmup-epochs', type=int, default=1,
-                        help='Warmup epochs')
     parser.add_argument('--check-val-every-n-epoch', type=int, default=1,
                         help='Run val loop every 10 training epochs')
+    
     parser.add_argument('--lr', type=float, default=1e-3,
                         help='Learning rate')
     parser.add_argument('--lr-scheduler', type=str, default=None,
                         help='Learning rate scheduler')
+    parser.add_argument('--warmup-epochs', type=int, default=1,
+                        help='Warmup epochs')
+    parser.add_argument('--eta-min', type=float, default=0,
+                        help='Minimum learning rate')
+    
     parser.add_argument('--mpt', help="Enable Mixed Precision Training", action='store_true')
     parser.add_argument('--seed', type=int, default=28,
                         help='Random seed')
@@ -184,8 +188,10 @@ def handle_train(args):
     
     m = RetinaNetModule(model, 
                         lr=args.lr,
+                        eta_min=args.eta_min,
                         lr_scheduler=args.lr_scheduler,
                         warmup_epochs=args.warmup_epochs,
+                        max_epochs=args.max_epochs,
                         last_epoch=last_epoch)
     
     kwargs = {}

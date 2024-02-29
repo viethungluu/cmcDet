@@ -9,15 +9,19 @@ class RetinaNetModule(L.LightningModule):
     def __init__(self,
                  model,
                  lr: float=1e-3,
+                 eta_min: float=0,
                  lr_scheduler: str=None,
                  warmup_epochs: int=1,
+                 max_epochs: int=100,
                  last_epoch:int=-1):
         super().__init__()
 
         self.model = model
         self.lr = lr
+        self.eta_min = eta_min
         self.lr_scheduler = lr_scheduler
         self.warmup_epochs = warmup_epochs
+        self.max_epochs = max_epochs
         self.last_epoch = last_epoch
 
         self.metric = MeanAveragePrecision(iou_type="bbox", backend='pycocotools')
@@ -35,14 +39,14 @@ class RetinaNetModule(L.LightningModule):
         if self.lr_scheduler == "CosineAnnealingLR":
             scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(
                 optimizer, 
-                T_max=100, 
+                T_max=self.max_epochs, 
                 last_epoch=self.last_epoch
             )
         elif self.lr_scheduler == "LinearWarmupCosineAnnealingLR":
             scheduler = pl_bolts.optimizers.lr_scheduler.LinearWarmupCosineAnnealingLR(
                 optimizer, 
                 warmup_epochs=self.warmup_epochs,
-                max_epochs=100,
+                max_epochs=self.max_epochs,
                 last_epoch=self.last_epoch
             )
         elif self.lr_scheduler == "ReduceLROnPlateau":
@@ -53,7 +57,7 @@ class RetinaNetModule(L.LightningModule):
             scheduler = torch.optim.lr_scheduler.CosineAnnealingWarmRestarts(
                 optimizer,
                 T_0=10,
-                eta_min=1e-3,
+                eta_min=self.eta_min,
                 last_epoch=self.last_epoch
             )
         else:
