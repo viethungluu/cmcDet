@@ -1,36 +1,36 @@
-import os
-import numpy as np
 import argparse
-import math
 
+import torchvision
 from torchvision.models.detection.retinanet import RetinaNet, RetinaNetHead, retinanet_resnet50_fpn, retinanet_resnet50_fpn_v2
 from torchvision.ops.feature_pyramid_network import LastLevelP6P7
+
+from torchvision.io import read_image
+from torchvision.utils import draw_bounding_boxes
+import torchvision.transforms.functional as F
 
 import lightning as L
 import albumentations as A
 
+import cv2
+
 from models.backbone_utils import _dual_resnet_fpn_extractor
 from models.resnet import CMCResNets
 from models.cmc_retinanet import RetinaNetModule
-from dataset.datamodule import PascalDataModule
-from dataset.pascal.pascal_utils import generate_pascal_category_names
 from dataset.colorspace_transforms import RGB2Lab
 
 def _parse_args():
-    parser = argparse.ArgumentParser(description="Training (CMC)RetinaNet on Pascal VOC format")
-    parser.add_argument('--dataset-path', type=str, default=None,
-                        help='Path to dataset in Pascal VOC format')
+    parser = argparse.ArgumentParser(description="Inference on image")
+    parser.add_argument('-i', '--input-image', type=str, default=None,
+                        help='Path/URL of the checkpoint from which training is resumed')
+    parser.add_argument('-o', '--output-image', type=str, default=None,
+                        help='Path/URL of the checkpoint from which training is resumed')
     parser.add_argument('--backbone-choice', type=str, default='dual', 
                         choices=["dual", "single"],
                         help='Backbone type')
     parser.add_argument('--ckpt-path', type=str, default=None,
                         help='Path/URL of the checkpoint from which training is resumed')
-    parser.add_argument('--test-batch-size', type=int, default=4,
-                        help='Test/valid batch size')
     parser.add_argument('--num-classes', type=int, required=True,
                         help='Number of classess')
-    parser.add_argument('--trainable-backbone-layers', type=int, default=0,
-                        help='Number of trainable backbone layers.')
     parser.add_argument('--cmc-backbone', type=str, default='resnet50v2', 
                         choices=["resnet50v2", "resnet50v3"],
                         help='Backbone type')
@@ -44,20 +44,6 @@ def _parse_args():
 def handle_test(args):
     # seed so that results are reproducible
     L.seed_everything(args.seed)
-
-    if args.backbone_choice == "dual":
-        test_transforms = A.Compose([
-                                RGB2Lab(),
-                            ],
-                            bbox_params=A.BboxParams(format='pascal_voc', label_fields=['class_labels']))
-    else:
-        test_transforms = None
-
-    dm = PascalDataModule(dataset_path=args.dataset_path,
-                          test_batch_size=args.test_batch_size,
-                          test_transforms=test_transforms,
-                          seed=args.seed)
-    dm.setup(stage="test")
     
     if args.backbone_choice == "dual":
         cmc = CMCResNets(name=args.cmc_backbone)
@@ -93,15 +79,24 @@ def handle_test(args):
         in_channels = model.backbone.out_channels
         model.head = RetinaNetHead(in_channels, num_anchors, num_classes=args.num_classes)
 
-    m = RetinaNetModule(model)
+    m = RetinaNetModule.load_from_checkpoint(args.ckpt_path, model=model)
+    m.eval()
 
-    # init trainer
-    trainer = L.Trainer()
+    transform = A.Compose([RGB2Lab()],
+                            bbox_params=A.BboxParams(format='pascal_voc', label_fields=['class_labels']))
+    to_tensor = torchvision.transforms.ToTensor()
+    
+    image = cv2.cvtColor(cv2.imread(args.input_image), cv2.COLOR_BGR2RGB)
+    transformed = transform(image=image, bboxes=[], class_labels=[])
+    image = transformed["image"]
+    image = to_tensor(image)
+    image = image.unsqueeze(0)
 
-    # test (pass in the model)
-    trainer.test(m,
-                 dm,
-                 ckpt_path=args.ckpt_path)
+    preds = m(image)
+    result = draw_bounding_boxes(image, preds["boxes"], width=2)
+    result = result.detach()
+    result = F.to_pil_image(result)
+    result.save(args.output_image)
 
 def main():
     args = _parse_args()
