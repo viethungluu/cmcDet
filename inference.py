@@ -58,7 +58,7 @@ def handle_test(args):
         backbone = _dual_resnet_fpn_extractor(
             backbone_l=cmc.encoder.module.l_to_ab, 
             backbone_ab=cmc.encoder.module.ab_to_l, 
-            trainable_layers=args.trainable_backbone_layers, 
+            trainable_layers=0, 
             returned_layers=[2, 3, 4], 
             extra_blocks=extra_blocks
         )
