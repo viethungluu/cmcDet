@@ -1,3 +1,4 @@
+import numpy as np
 import argparse
 
 import torchvision
@@ -24,6 +25,8 @@ def _parse_args():
                         help='Path/URL of the checkpoint from which training is resumed')
     parser.add_argument('-o', '--output-image', type=str, default=None,
                         help='Path/URL of the checkpoint from which training is resumed')
+    parser.add_argument('--dataset', type=str, required=True, choices=["vehicle", "person"],
+                        help='Name of dataset')
     parser.add_argument('--backbone-choice', type=str, default='dual', 
                         choices=["dual", "single"],
                         help='Backbone type')
@@ -46,7 +49,13 @@ def _parse_args():
 def handle_test(args):
     # seed so that results are reproducible
     L.seed_everything(args.seed)
-    
+
+    if args.dataset == "vehicle":
+        labels = ['__background__', 'big bus', 'big truck', 'bus-l-', 'bus-s-', 'car', 'mid truck', 'small bus', 'small truck', 'truck-l-', 'truck-m-', 'truck-s-', 'truck-xl-']
+    else:
+        labels = ['__background__', 'person']
+    labels = np.array(labels)
+
     if args.backbone_choice == "dual":
         cmc = CMCResNets(name=args.cmc_backbone)
         
@@ -98,7 +107,10 @@ def handle_test(args):
     preds = m(image.float())
     output = preds[0]
     vis = read_image(args.input_image)
-    result = draw_bounding_boxes(vis, boxes=output['boxes'][output['scores'] > args.score_threshold], width=2)
+    result = draw_bounding_boxes(vis, 
+                                 boxes=output['boxes'][output['scores'] > args.score_threshold], 
+                                 labels=labels[output['class_labels']],
+                                 width=2)
     result = result.detach()
     result = F.to_pil_image(result)
     result.save(args.output_image)
