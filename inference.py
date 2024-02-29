@@ -110,6 +110,7 @@ def handle_test(args):
     result = draw_bounding_boxes(vis, 
                                  boxes=output['boxes'][output['scores'] > args.score_threshold], 
                                  labels=labels[output['labels'][output['scores'] > args.score_threshold].cpu()],
+                                 font_size=14,
                                  width=2)
     result = result.detach()
     result = F.to_pil_image(result)
