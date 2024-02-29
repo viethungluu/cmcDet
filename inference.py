@@ -111,6 +111,7 @@ def handle_test(args):
                                  boxes=output['boxes'][output['scores'] > args.score_threshold], 
                                  labels=labels[output['labels'][output['scores'] > args.score_threshold].cpu()],
                                  font_size=14,
+                                 font="Times New Roman",
                                  width=2)
     result = result.detach()
     result = F.to_pil_image(result)
