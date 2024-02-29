@@ -31,6 +31,8 @@ def _parse_args():
                         help='Path/URL of the checkpoint from which training is resumed')
     parser.add_argument('--num-classes', type=int, required=True,
                         help='Number of classess')
+    parser.add_argument('--score-threshold', type=float, default=0.6,
+                        help='Score threshold')
     parser.add_argument('--cmc-backbone', type=str, default='resnet50v2', 
                         choices=["resnet50v2", "resnet50v3"],
                         help='Backbone type')
@@ -91,9 +93,12 @@ def handle_test(args):
     image = transformed["image"]
     image = to_tensor(image)
     image = image.unsqueeze(0)
+    image = image.to(device='cuda')
 
-    preds = m(image)
-    result = draw_bounding_boxes(image, preds["boxes"], width=2)
+    preds = m(image.float())
+    output = preds[0]
+    vis = read_image(args.input_image)
+    result = draw_bounding_boxes(vis, boxes=output['boxes'][output['scores'] > args.score_threshold], width=2)
     result = result.detach()
     result = F.to_pil_image(result)
     result.save(args.output_image)
