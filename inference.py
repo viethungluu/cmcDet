@@ -1,6 +1,7 @@
 import numpy as np
 import argparse
 
+import torch
 import torchvision
 from torchvision.models.detection.retinanet import RetinaNet, RetinaNetHead, retinanet_resnet50_fpn, retinanet_resnet50_fpn_v2
 from torchvision.ops.feature_pyramid_network import LastLevelP6P7
@@ -49,6 +50,11 @@ def _parse_args():
 def handle_test(args):
     # seed so that results are reproducible
     L.seed_everything(args.seed)
+
+    if torch.cuda.is_available():
+        device = torch.device('cuda')
+    else:
+        device = torch.device('cpu')
 
     if args.dataset == "vehicle":
         labels = ['__background__', 'big bus', 'big truck', 'bus-l-', 'bus-s-', 'car', 'mid truck', 'small bus', 'small truck', 'truck-l-', 'truck-m-', 'truck-s-', 'truck-xl-']
@@ -102,7 +108,7 @@ def handle_test(args):
     image = transformed["image"]
     image = to_tensor(image)
     image = image.unsqueeze(0)
-    image = image.to(device='cuda')
+    image = image.to(device=device)
 
     preds = m(image.float())
     output = preds[0]
@@ -111,7 +117,7 @@ def handle_test(args):
                                  boxes=output['boxes'][output['scores'] > args.score_threshold], 
                                  labels=labels[output['labels'][output['scores'] > args.score_threshold].cpu()],
                                  font_size=14,
-                                 font="Times New Roman",
+                                 font="Arial.ttf",
                                  width=2)
     result = result.detach()
     result = F.to_pil_image(result)
