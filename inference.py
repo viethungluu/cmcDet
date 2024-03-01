@@ -47,7 +47,7 @@ def _parse_args():
     args = parser.parse_args()
     return args
 
-def handle_test(args):
+def handle_inference(args):
     # seed so that results are reproducible
     L.seed_everything(args.seed)
 
@@ -99,13 +99,18 @@ def handle_test(args):
     m = RetinaNetModule.load_from_checkpoint(args.ckpt_path, model=model)
     m.eval()
 
-    transform = A.Compose([RGB2Lab()],
-                            bbox_params=A.BboxParams(format='pascal_voc', label_fields=['class_labels']))
+    if args.backbone_choice == "dual":
+        transform = A.Compose([RGB2Lab()],
+                                bbox_params=A.BboxParams(format='pascal_voc', label_fields=['class_labels']))
+    else:
+        transform = None
+
     to_tensor = torchvision.transforms.ToTensor()
     
     image = cv2.cvtColor(cv2.imread(args.input_image), cv2.COLOR_BGR2RGB)
-    transformed = transform(image=image, bboxes=[], class_labels=[])
-    image = transformed["image"]
+    if transform:
+        transformed = transform(image=image, bboxes=[], class_labels=[])
+        image = transformed["image"]
     image = to_tensor(image)
     image = image.unsqueeze(0)
     image = image.to(device=device)
@@ -125,7 +130,7 @@ def handle_test(args):
 
 def main():
     args = _parse_args()
-    handle_test(args)
+    handle_inference(args)
 
 if __name__ == "__main__":
     main()
