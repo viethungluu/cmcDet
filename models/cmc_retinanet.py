@@ -7,7 +7,7 @@ import pl_bolts
 
 import matplotlib.pyplot as plt
 
-def plot_one_curve(ax, thr, x, y, title="", xlabel="Recall | Score", ylabel="Precision", style="-"):
+def plot_one_curve(ax, thr, x, y, title="", style="-"):
     try:
         _ = ax.plot(
             x,
@@ -15,8 +15,6 @@ def plot_one_curve(ax, thr, x, y, title="", xlabel="Recall | Score", ylabel="Pre
             style,
             label="{0}".format(title),
         )
-        ax.set_xlabel(xlabel)
-        ax.set_ylabel(ylabel)
     except Exception as e:
         print(e)
 
@@ -152,15 +150,17 @@ class RetinaNetModule(L.LightningModule):
         precision_s = map_dict["precision"]
         rec_thresholds = [i/100 for i in range(101)]  # this's defined by torchmetrics document by default
         # precision-recall curves for each classes
-        fig, ax = plt.subplots(1, figsize=(10, 10))
-        ax.set_ylim(-0.0, 1.1)
-        ax.set_xlim(-0.0, 1.1)
+        # fig, ax = plt.subplots(1, figsize=(10, 10))
+        plt.set_ylim(-0.0, 1.1)
+        plt.set_xlim(-0.0, 1.1)
         for c, classname in enumerate(self.classes):
             if c == 0:
                 continue
             thr = 0.5
             precision = precision_s[0,:, c, 0, -1]
-            plot_one_curve(ax, thr, precision, rec_thresholds, title=classname)
-        ax.legend(bbox_to_anchor=(1.04, 0.5), loc="center left", borderaxespad=0)
+            plot_one_curve(plt, thr, precision, rec_thresholds, title=classname)
+        plt.set_xlabel("Recall | Score")
+        plt.set_ylabel("Precision")
+        plt.legend(bbox_to_anchor=(0.5, 0.5), loc="center left", borderaxespad=0)
         plt.title(f"precision-recall curves")
         plt.savefig("pr_curve.png")
