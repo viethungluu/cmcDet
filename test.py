@@ -27,8 +27,8 @@ def _parse_args():
                         help='Path/URL of the checkpoint from which training is resumed')
     parser.add_argument('--test-batch-size', type=int, default=4,
                         help='Test/valid batch size')
-    parser.add_argument('--num-classes', type=int, required=True,
-                        help='Number of classess')
+    parser.add_argument('--dataset-name', type=str, required=True,
+                        help='Name of dataset')
     parser.add_argument('--trainable-backbone-layers', type=int, default=0,
                         help='Number of trainable backbone layers.')
     parser.add_argument('--cmc-backbone', type=str, default='resnet50v2', 
@@ -44,6 +44,13 @@ def _parse_args():
 def handle_test(args):
     # seed so that results are reproducible
     L.seed_everything(args.seed)
+
+    if args.dataset_name == "vehicle":
+        labels = ['__background__', 'big bus', 'big truck', 'bus-l-', 'bus-s-', 'car', 'mid truck', 'small bus', 'small truck', 'truck-l-', 'truck-m-', 'truck-s-', 'truck-xl-']
+    else:
+        labels = ['__background__', 'person']
+    labels = np.array(labels)
+    num_classes = len(labels)
 
     if args.backbone_choice == "dual":
         test_transforms = A.Compose([
@@ -80,7 +87,7 @@ def handle_test(args):
         image_mean = [(0 + 100) / 2, (-86.183 + 98.233) / 2, (-107.857 + 94.478) / 2]
         image_std = [(100 - 0) / 2, (86.183 + 98.233) / 2, (107.857 + 94.478) / 2]
         model = RetinaNet(backbone,
-                          num_classes=args.num_classes,
+                          num_classes=num_classes,
                           image_mean=image_mean,
                           image_std=image_std)
     else:
@@ -91,9 +98,9 @@ def handle_test(args):
         
         num_anchors = model.head.classification_head.num_anchors
         in_channels = model.backbone.out_channels
-        model.head = RetinaNetHead(in_channels, num_anchors, num_classes=args.num_classes)
+        model.head = RetinaNetHead(in_channels, num_anchors, num_classes=num_classes)
 
-    m = RetinaNetModule(model)
+    m = RetinaNetModule(model, classes=labels)
 
     # init trainer
     trainer = L.Trainer()
