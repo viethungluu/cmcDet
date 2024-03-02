@@ -5,9 +5,25 @@ from torchmetrics.detection import MeanAveragePrecision
 import lightning as L
 import pl_bolts
 
+import matplotlib.pyplot as plt
+
+def plot_one_curve(ax, thr, x, y, title="", xlabel="Recall | Score", ylabel="Precision", style="-"):
+    try:
+        _ = ax.plot(
+            x,
+            y,
+            style,
+            label="{0}, IOU >= {1}".format(title, thr),
+        )
+        ax.set_xlabel(xlabel)
+        ax.set_ylabel(ylabel)
+    except Exception as e:
+        print(e)
+
 class RetinaNetModule(L.LightningModule):
     def __init__(self,
                  model,
+                 classes=None,
                  lr: float=1e-3,
                  eta_min: float=0,
                  lr_scheduler: str=None,
@@ -23,12 +39,10 @@ class RetinaNetModule(L.LightningModule):
         self.warmup_epochs = warmup_epochs
         self.max_epochs = max_epochs
         self.last_epoch = last_epoch
+        self.classes = classes
 
         self.metric = MeanAveragePrecision(iou_type="bbox", 
                                            backend='pycocotools', 
-                                           iou_thresholds=[0.6],
-                                           rec_thresholds=[0.001],
-                                           max_detection_thresholds=[1, 10, 300],
                                            extended_summary=True)
 
     def forward(self, x):
@@ -132,8 +146,21 @@ class RetinaNetModule(L.LightningModule):
         self.log('mar_small', map_dict['mar_small'], on_step=False, on_epoch=True, prog_bar=True, logger=True)
         self.log('mar_medium', map_dict['mar_medium'], on_step=False, on_epoch=True, prog_bar=True, logger=True)
         self.log('mar_large', map_dict['mar_large'], on_step=False, on_epoch=True, prog_bar=True, logger=True)
-
-        # self.log('precision', map_dict['precision'], on_step=False, on_epoch=True, prog_bar=True, logger=True)
-        # self.log('recall', map_dict['recall'], on_step=False, on_epoch=True, prog_bar=True, logger=True)
-
         self.metric.reset()
+
+        # plot
+        precision_s = map_dict["precision"]
+        rec_thresholds = [i/100 for i in range(101)]  # this's defined by torchmetrics document by default
+        # precision-recall curves for each classes
+        fig, ax = plt.subplots(1, figsize=(10,6))
+        ax.set_ylim(-0.0, 1.1)
+        ax.set_xlim(-0.0, 1.1)
+        for c, classname in enumerate(self.classes):
+            if c == 0:
+                continue
+            thr = 0.5
+            precision = precision_s[0,:, c, 0, -1]
+            plot_one_curve(ax, thr, precision, rec_thresholds, title=classname)
+        ax.legend(bbox_to_anchor=(1.04, 0.5), loc="center left", borderaxespad=0)
+        plt.title(f"precision-recall curves for class {c}")
+        plt.savefig("pr_curve.png")
