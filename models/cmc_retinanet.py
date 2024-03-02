@@ -28,7 +28,7 @@ class RetinaNetModule(L.LightningModule):
                                            backend='pycocotools', 
                                            iou_thresholds=[0.6],
                                            rec_thresholds=[0.001],
-                                           max_detection_thresholds=[300],
+                                           max_detection_thresholds=[1, 10, 300],
                                            extended_summary=True)
 
     def forward(self, x):
