@@ -24,7 +24,7 @@ class RetinaNetModule(L.LightningModule):
         self.max_epochs = max_epochs
         self.last_epoch = last_epoch
 
-        self.metric = MeanAveragePrecision(iou_type="bbox", backend='pycocotools')
+        self.metric = MeanAveragePrecision(iou_type="bbox", backend='pycocotools', extended_summary=True)
 
     def forward(self, x):
         # return loss_dict in fit stage
@@ -88,8 +88,7 @@ class RetinaNetModule(L.LightningModule):
 
         preds = self.model(images, targets)
         self.metric.update(preds, targets)
-        
-    
+         
     def on_validation_epoch_end(self):
         map_dict = self.metric.compute()
         self.log('map', map_dict['map'], on_step=False, on_epoch=True, prog_bar=True, logger=True)
@@ -128,4 +127,9 @@ class RetinaNetModule(L.LightningModule):
         self.log('mar_small', map_dict['mar_small'], on_step=False, on_epoch=True, prog_bar=True, logger=True)
         self.log('mar_medium', map_dict['mar_medium'], on_step=False, on_epoch=True, prog_bar=True, logger=True)
         self.log('mar_large', map_dict['mar_large'], on_step=False, on_epoch=True, prog_bar=True, logger=True)
+
+        self.log('precision', map_dict['precision'], on_step=False, on_epoch=True, prog_bar=True, logger=True)
+        self.log('recall', map_dict['recall'], on_step=False, on_epoch=True, prog_bar=True, logger=True)
+        self.log('ious', map_dict['ious'], on_step=False, on_epoch=True, prog_bar=True, logger=True)
+
         self.metric.reset()
