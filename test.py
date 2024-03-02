@@ -46,11 +46,11 @@ def handle_test(args):
     L.seed_everything(args.seed)
 
     if args.dataset_name == "vehicle":
-        labels = ['__background__', 'big bus', 'big truck', 'bus-l-', 'bus-s-', 'car', 'mid truck', 'small bus', 'small truck', 'truck-l-', 'truck-m-', 'truck-s-', 'truck-xl-']
+        labels = ['big bus', 'big truck', 'bus-l-', 'bus-s-', 'car', 'mid truck', 'small bus', 'small truck', 'truck-l-', 'truck-m-', 'truck-s-', 'truck-xl-']
     else:
-        labels = ['__background__', 'person']
+        labels = ['person']
     labels = np.array(labels)
-    num_classes = len(labels)
+    num_classes = len(labels) + 1
 
     if args.backbone_choice == "dual":
         test_transforms = A.Compose([

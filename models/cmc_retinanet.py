@@ -156,8 +156,6 @@ class RetinaNetModule(L.LightningModule):
         ax.set_ylim(-0.0, 1.1)
         ax.set_xlim(-0.0, 1.1)
         for c, classname in enumerate(self.classes):
-            if c == 0:
-                continue
             thr = 0.5
             precision = precision_s[0,:, c, 0, -1]
             plot_one_curve(ax, thr, precision, rec_thresholds, title=classname)
