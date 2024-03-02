@@ -7,7 +7,7 @@ import pl_bolts
 
 import matplotlib.pyplot as plt
 
-def plot_one_curve(ax, thr, x, y, title="", xlabel="Recall | Score", ylabel="Precision", style="-"):
+def plot_one_curve(ax, thr, x, y, title="", xlabel="Recall", ylabel="Precision", style="-"):
     try:
         _ = ax.plot(
             x,
@@ -162,5 +162,5 @@ class RetinaNetModule(L.LightningModule):
             precision = precision_s[0,:, c, 0, -1]
             plot_one_curve(ax, thr, precision, rec_thresholds, title=classname)
         ax.legend(bbox_to_anchor=(1.01, 0.5), loc="center left", borderaxespad=0)
-        plt.title(f"precision-recall curves")
+        plt.title(f"Precision-Recall curves")
         plt.savefig("pr_curve.png")
