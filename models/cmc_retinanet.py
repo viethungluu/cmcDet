@@ -27,7 +27,7 @@ class RetinaNetModule(L.LightningModule):
         self.metric = MeanAveragePrecision(iou_type="bbox", 
                                            backend='pycocotools', 
                                            iou_thresholds=[0.5],
-                                           rec_thresholds=[0.001]
+                                           rec_thresholds=[0.001],
                                            extended_summary=True)
 
     def forward(self, x):
@@ -132,7 +132,7 @@ class RetinaNetModule(L.LightningModule):
         self.log('mar_medium', map_dict['mar_medium'], on_step=False, on_epoch=True, prog_bar=True, logger=True)
         self.log('mar_large', map_dict['mar_large'], on_step=False, on_epoch=True, prog_bar=True, logger=True)
 
-        self.log('precision', map_dict['precision'], on_step=False, on_epoch=True, prog_bar=True, logger=True)
-        self.log('recall', map_dict['recall'], on_step=False, on_epoch=True, prog_bar=True, logger=True)
+        # self.log('precision', map_dict['precision'], on_step=False, on_epoch=True, prog_bar=True, logger=True)
+        # self.log('recall', map_dict['recall'], on_step=False, on_epoch=True, prog_bar=True, logger=True)
 
         self.metric.reset()
