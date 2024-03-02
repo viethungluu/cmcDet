@@ -26,8 +26,9 @@ class RetinaNetModule(L.LightningModule):
 
         self.metric = MeanAveragePrecision(iou_type="bbox", 
                                            backend='pycocotools', 
-                                           iou_thresholds=[0.5],
+                                           iou_thresholds=[0.6],
                                            rec_thresholds=[0.001],
+                                           max_detection_thresholds=[300],
                                            extended_summary=True)
 
     def forward(self, x):
