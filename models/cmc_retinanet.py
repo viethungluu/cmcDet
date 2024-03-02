@@ -152,7 +152,7 @@ class RetinaNetModule(L.LightningModule):
         precision_s = map_dict["precision"]
         rec_thresholds = [i/100 for i in range(101)]  # this's defined by torchmetrics document by default
         # precision-recall curves for each classes
-        fig, ax = plt.subplots(1, figsize=(10, 10))
+        fig, ax = plt.subplots(1, figsize=(6, 10))
         ax.set_ylim(-0.0, 1.1)
         ax.set_xlim(-0.0, 1.1)
         for c, classname in enumerate(self.classes):
@@ -161,6 +161,6 @@ class RetinaNetModule(L.LightningModule):
             thr = 0.5
             precision = precision_s[0,:, c, 0, -1]
             plot_one_curve(ax, thr, precision, rec_thresholds, title=classname)
-        ax.legend(bbox_to_anchor=(0.5, 0.5), loc="center left", borderaxespad=0)
+        ax.legend(bbox_to_anchor=(1, 0.5), loc="top left", borderaxespad=0)
         plt.title(f"precision-recall curves")
         plt.savefig("pr_curve.png")
