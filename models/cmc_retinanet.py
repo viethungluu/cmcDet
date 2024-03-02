@@ -13,7 +13,7 @@ def plot_one_curve(ax, thr, x, y, title="", xlabel="Recall | Score", ylabel="Pre
             x,
             y,
             style,
-            label="{0}, IOU >= {1}".format(title, thr),
+            label="{0}".format(title),
         )
         ax.set_xlabel(xlabel)
         ax.set_ylabel(ylabel)
@@ -152,7 +152,7 @@ class RetinaNetModule(L.LightningModule):
         precision_s = map_dict["precision"]
         rec_thresholds = [i/100 for i in range(101)]  # this's defined by torchmetrics document by default
         # precision-recall curves for each classes
-        fig, ax = plt.subplots(1, figsize=(10,6))
+        fig, ax = plt.subplots(1, figsize=(10, 10))
         ax.set_ylim(-0.0, 1.1)
         ax.set_xlim(-0.0, 1.1)
         for c, classname in enumerate(self.classes):
