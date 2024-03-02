@@ -161,6 +161,6 @@ class RetinaNetModule(L.LightningModule):
             thr = 0.5
             precision = precision_s[0,:, c, 0, -1]
             plot_one_curve(ax, thr, precision, rec_thresholds, title=classname)
-        ax.legend(bbox_to_anchor=(1, 0.5), loc="top left", borderaxespad=0)
+        ax.legend(bbox_to_anchor=(1, 0.5), loc="upper left", borderaxespad=0)
         plt.title(f"precision-recall curves")
         plt.savefig("pr_curve.png")
