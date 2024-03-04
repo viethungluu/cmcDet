@@ -33,8 +33,6 @@ def _parse_args():
                         help='Backbone type')
     parser.add_argument('--ckpt-path', type=str, default=None,
                         help='Path/URL of the checkpoint from which training is resumed')
-    parser.add_argument('--num-classes', type=int, required=True,
-                        help='Number of classess')
     parser.add_argument('--score-threshold', type=float, default=0.6,
                         help='Score threshold')
     parser.add_argument('--cmc-backbone', type=str, default='resnet50v2', 
@@ -61,6 +59,7 @@ def handle_inference(args):
     else:
         labels = ['__background__', 'person']
     labels = np.array(labels)
+    num_classes = len(labels)
 
     if args.backbone_choice == "dual":
         cmc = CMCResNets(name=args.cmc_backbone)
@@ -83,7 +82,7 @@ def handle_inference(args):
         image_mean = [(0 + 100) / 2, (-86.183 + 98.233) / 2, (-107.857 + 94.478) / 2]
         image_std = [(100 - 0) / 2, (86.183 + 98.233) / 2, (107.857 + 94.478) / 2]
         model = RetinaNet(backbone,
-                          num_classes=args.num_classes,
+                          num_classes=num_classes,
                           image_mean=image_mean,
                           image_std=image_std)
     else:
@@ -94,7 +93,7 @@ def handle_inference(args):
         
         num_anchors = model.head.classification_head.num_anchors
         in_channels = model.backbone.out_channels
-        model.head = RetinaNetHead(in_channels, num_anchors, num_classes=args.num_classes)
+        model.head = RetinaNetHead(in_channels, num_anchors, num_classes=num_classes)
 
     m = RetinaNetModule.load_from_checkpoint(args.ckpt_path, model=model)
     m.eval()
