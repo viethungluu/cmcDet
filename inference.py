@@ -20,6 +20,10 @@ from models.resnet import CMCResNets
 from models.cmc_retinanet import RetinaNetModule
 from dataset.colorspace_transforms import RGB2Lab
 
+import warnings
+# Settings the warnings to be ignored 
+warnings.filterwarnings('ignore') 
+
 def _parse_args():
     parser = argparse.ArgumentParser(description="Inference on image")
     parser.add_argument('-i', '--input-image', type=str, default=None,

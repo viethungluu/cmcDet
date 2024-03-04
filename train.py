@@ -25,6 +25,10 @@ from dataset.datamodule import PascalDataModule
 from dataset.pascal.pascal_utils import generate_pascal_category_names
 from dataset.colorspace_transforms import RGB2Lab
 
+import warnings
+# Settings the warnings to be ignored 
+warnings.filterwarnings('ignore') 
+
 def _parse_args():
     parser = argparse.ArgumentParser(description="Training (CMC)RetinaNet on Pascal VOC format")
     parser.add_argument('--dataset-path', type=str, default=None,
