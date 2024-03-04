@@ -128,7 +128,7 @@ def handle_inference(args):
             detection[label] = 0
         
         detection[label] += 1
-    for k, v in detection:
+    for k, v in detection.items():
         print("Found {0} for class {1}".format(v, k))
 
     # visualize the boxes
