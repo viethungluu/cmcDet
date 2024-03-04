@@ -117,9 +117,24 @@ def handle_inference(args):
     preds = m(image.float())
     output = preds[0]
     vis = read_image(args.input_image)
+
+    indice = output['scores'] > args.score_threshold
+    boxes = output['boxes'][indice]
+    labels = labels[output['labels'][indice].cpu()]
+    # summary the number of detected objects for each class
+    detection = {}
+    for label in labels:
+        if label not in detection:
+            detection[label] = 0
+        
+        detection[label] += 1
+    for k, v in detection:
+        print("Found {0} for class {1}".format(v, k))
+
+    # visualize the boxes
     result = draw_bounding_boxes(vis, 
-                                 boxes=output['boxes'][output['scores'] > args.score_threshold], 
-                                 labels=labels[output['labels'][output['scores'] > args.score_threshold].cpu()],
+                                 boxes=boxes, 
+                                 labels=labels,
                                  font_size=14,
                                  font="Roboto-Regular.ttf",
                                  width=2)
