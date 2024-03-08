@@ -7,7 +7,7 @@ import pl_bolts
 
 import matplotlib.pyplot as plt
 
-from models.eval_utils import ConfusionMatrix
+# from models.eval_utils import ConfusionMatrix
 
 def plot_one_curve(ax, thr, x, y, title="", xlabel="Recall", ylabel="Precision", style="-"):
     try:
@@ -46,7 +46,7 @@ class RetinaNetModule(L.LightningModule):
         self.metric = MeanAveragePrecision(iou_type="bbox", 
                                            backend='pycocotools', 
                                            extended_summary=True)
-        self.cm = ConfusionMatrix(len(self.classes), 0.5, 0.5)
+        # self.cm = ConfusionMatrix(len(self.classes), 0.5, 0.5)
 
     def forward(self, x):
         # return loss_dict in fit stage
@@ -135,7 +135,7 @@ class RetinaNetModule(L.LightningModule):
         preds = self.model(images, targets)
         self.metric.update(preds, targets)
         
-        self.cm.process_batch(preds, targets)
+        # self.cm.process_batch(preds, targets)
     
     def on_test_epoch_end(self):
         map_dict = self.metric.compute()
@@ -153,7 +153,7 @@ class RetinaNetModule(L.LightningModule):
         self.log('mar_large', map_dict['mar_large'], on_step=False, on_epoch=True, prog_bar=True, logger=True)
         self.metric.reset()
 
-        self.cm.print_matrix()
+        # self.cm.print_matrix()
 
         # plot
         precision_s = map_dict["precision"]
