@@ -7,7 +7,7 @@ import pl_bolts
 
 import matplotlib.pyplot as plt
 
-from eval_utils import ConfusionMatrix
+from models.eval_utils import ConfusionMatrix
 
 def plot_one_curve(ax, thr, x, y, title="", xlabel="Recall", ylabel="Precision", style="-"):
     try:
