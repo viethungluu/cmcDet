@@ -135,7 +135,7 @@ class RetinaNetModule(L.LightningModule):
         preds = self.model(images, targets)
         self.metric.update(preds, targets)
         
-        self.cm.process_batch(preds, targets)
+        self.cm.process_batch(preds.cpu(), targets.cpu())
     
     def on_test_epoch_end(self):
         map_dict = self.metric.compute()
