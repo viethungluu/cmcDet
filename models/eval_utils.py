@@ -47,12 +47,12 @@ class ConfusionMatrix:
         Returns:
             None, updates confusion matrix accordingly
         """
-        gt_classes = [t["labels"] for t in target].astype(np.int16)
-        gt_boxes = [t["boxes"] for t in target]
+        gt_classes = np.array([t["labels"] for t in target]).astype(np.int16)
+        gt_boxes = np.array([t["boxes"] for t in target])
         
-        pred_labels = [p["labels"] for p in preds].astype(np.int16)
-        pred_cnfs = [p["scores"] for p in preds]
-        pred_boxes = [p["boxes"] for p in preds]
+        pred_labels = np.array([p["labels"] for p in preds]).astype(np.int16)
+        pred_cnfs = np.array([p["scores"] for p in preds])
+        pred_boxes = np.array([p["boxes"] for p in preds])
 
         try:
             indices = pred_cnfs[pred_cnfs > self.CONF_THRESHOLD]
