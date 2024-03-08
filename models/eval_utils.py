@@ -47,21 +47,25 @@ class ConfusionMatrix:
         Returns:
             None, updates confusion matrix accordingly
         """
-        gt_classes = target["labels"].astype(np.int16)
+        gt_classes = [t["labels"] for t in target].astype(np.int16)
+        gt_boxes = [t["boxes"] for t in target]
+        
+        pred_labels = [p["labels"] for p in preds].astype(np.int16)
+        pred_cnfs = [p["scores"] for p in preds]
+        pred_boxes = [p["boxes"] for p in preds]
 
         try:
-            indices = preds["scores"][preds["scores"] > self.CONF_THRESHOLD]
-            # detections = detections[detections[:, 4] > self.CONF_THRESHOLD]
+            indices = pred_cnfs[pred_cnfs > self.CONF_THRESHOLD]
         except IndexError or TypeError:
             # preds are empty, end of process
-            for i, label in enumerate(target["labels"]):
+            for i, label in enumerate(pred_labels):
                 gt_class = gt_classes[i]
                 self.matrix[self.num_classes, gt_class] += 1
             return
 
-        detection_classes = preds["labels"][indices].astype(np.int16)
+        detection_classes = pred_labels[indices].astype(np.int16)
 
-        all_ious = box_iou_calc(target["boxes"], preds["boxes"][indices])
+        all_ious = box_iou_calc(gt_boxes, pred_boxes[indices])
         want_idx = np.where(all_ious > self.IOU_THRESHOLD)
 
         all_matches = [[want_idx[0][i], want_idx[1][i], all_ious[want_idx[0][i], want_idx[1][i]]]
@@ -77,7 +81,7 @@ class ConfusionMatrix:
 
             all_matches = all_matches[np.unique(all_matches[:, 0], return_index=True)[1]]
 
-        for i, _ in enumerate(target["labels"]):
+        for i, _ in enumerate(gt_classes):
             gt_class = gt_classes[i]
             if all_matches.shape[0] > 0 and all_matches[all_matches[:, 0] == i].shape[0] == 1:
                 detection_class = detection_classes[int(all_matches[all_matches[:, 0] == i, 1][0])]
@@ -85,7 +89,7 @@ class ConfusionMatrix:
             else:
                 self.matrix[self.num_classes, gt_class] += 1
 
-        for i, _ in enumerate(preds["labels"][indices]):
+        for i, _ in enumerate(pred_labels[indices]):
             if not all_matches.shape[0] or ( all_matches.shape[0] and all_matches[all_matches[:, 1] == i].shape[0] == 0 ):
                 detection_class = detection_classes[i]
                 self.matrix[detection_class, self.num_classes] += 1
